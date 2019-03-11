@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: devices-access
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: CONFIG
+      profile: dev
+      uri: http://localhost:1111/
+server:
+  port: 8083
