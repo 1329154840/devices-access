@@ -41,4 +41,16 @@ public class Device {
         this.name = name;
         this.status = "关机";
     }
+
+    public Device(String id, Integer customId, Integer tenantId, String model, String name, String nickname, String status) {
+        this.id = id;
+        this.customId = customId;
+        this.tenantId = tenantId;
+        this.model = model;
+        this.name = name;
+        this.nickname = nickname;
+        this.status = status;
+    }
+    public Device() {
+    }
 }
