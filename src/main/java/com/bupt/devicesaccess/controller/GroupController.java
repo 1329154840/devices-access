@@ -3,11 +3,14 @@ package com.bupt.devicesaccess.controller;
 import com.alibaba.fastjson.JSON;
 import com.bupt.devicesaccess.dao.GroupRepository;
 import com.bupt.devicesaccess.model.Group;
+import com.bupt.devicesaccess.utils.JsonResponseUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -27,33 +30,86 @@ public class GroupController {
     @Autowired
     GroupRepository groupRepository;
 
+    /**
+     * 查询所有组
+     * @return
+     */
     @RequestMapping("/findAllGroup")
     public String findAllGroup(){
-        return JSON.toJSONString(groupRepository.findAll());
+        return JsonResponseUtil.ok(groupRepository.findAll());
     }
 
+    /**
+     * 按groupId查询list的group
+     * @param groupId
+     * @return
+     */
     @RequestMapping("/findByGroupId")
-    public String findByGroupId(@RequestParam(value = "id") String id){
-        return JSON.toJSONString(groupRepository.findByGroupId(id));
+    public String findByGroupId(@RequestParam(value = "groupId") String groupId){
+        return JsonResponseUtil.ok(groupRepository.findByGroupId(groupId));
     }
 
+    /**
+     * 插入新的组
+     * @param deviceId
+     * @return
+     */
     @RequestMapping("/insertNewGroup")
     public String insertNewGroup(@RequestParam(value = "deviceId") String deviceId){
         Group group = groupRepository.save(new Group(deviceId));
         log.info("New insert {}", group);
-        return JSON.toJSONString(group);
+        return JsonResponseUtil.ok(group);
     }
 
+    /**
+     * 插入已存在的组
+     * @param groupId
+     * @param deviceId
+     * @return
+     */
     @RequestMapping("/insertOldGroup")
     public String insertOldGroup(@RequestParam(value = "groupId") String groupId,
                                  @RequestParam(value = "deviceId") String deviceId){
         if(groupRepository.findByGroupId(groupId).isEmpty()){
-            return JSON.toJSONString(null);
+            return JsonResponseUtil.badResult("group不存在");
         }
 
         Group group = groupRepository.save( new Group( groupId, deviceId));
-        log.info("New insert {}", group);
-        return JSON.toJSONString(group);
+        log.info("Old insert {}", group);
+        return JsonResponseUtil.ok(group);
+    }
+
+    /**
+     * 删除组内单条记录
+     * @param groupId
+     * @param deviceId
+     * @return
+     */
+    @RequestMapping("/deleteGroupByPrimaryKey")
+    public String deleteGroupByPrimaryKey(@RequestParam(value = "groupId") String groupId,
+                              @RequestParam(value = "deviceId") String deviceId){
+        Group group = groupRepository.findByPrimaryKey(groupId,deviceId);
+        if (group == null){
+            return JsonResponseUtil.badResult("group不存在");
+        }
+        log.info("delete {}", group);
+        groupRepository.delete(group);
+        return JsonResponseUtil.ok(group);
+    }
+
+    /**
+     * 根据GroupId删除整组
+     * @param groupId
+     * @return
+     */
+    @RequestMapping("deleteGroupByGroupId")
+    public String deleteGroupByGroupId(@RequestParam(value = "groupId") String groupId){
+        if (groupRepository.findByGroupId(groupId).isEmpty()){
+            return JsonResponseUtil.badResult("group不存在");
+        }
+        groupRepository.deleteGroupByGroupId(groupId);
+        log.info("delete group {}", groupId);
+        return JsonResponseUtil.ok(groupId);
     }
 
 

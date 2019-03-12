@@ -21,5 +21,11 @@ import java.util.List;
  */
 public interface GroupRepository extends CrudRepository<Group,String> {
     @Query(" SELECT group_id,device_id FROM group WHERE group_id = :group_id  ")
-    List<Group> findByGroupId(@Param("group_id") String group_id);
+    List<Group> findByGroupId(@Param("group_id") String groupId);
+
+    @Query(" SELECT group_id,device_id FROM group WHERE group_id = :group_id AND  device_id = :device_id ")
+    Group findByPrimaryKey(@Param("group_id") String groupId,@Param("device_id") String deviceId);
+
+    @Query(" Delete From group WHERE group_id = :group_id ")
+    void deleteGroupByGroupId(@Param("group_id") String groupId);
 }

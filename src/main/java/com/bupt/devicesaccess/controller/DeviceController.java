@@ -3,6 +3,7 @@ package com.bupt.devicesaccess.controller;
 import com.alibaba.fastjson.JSON;
 import com.bupt.devicesaccess.dao.DeviceRepository;
 import com.bupt.devicesaccess.model.Device;
+import com.bupt.devicesaccess.utils.JsonResponseUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +28,8 @@ import java.util.Optional;
  * @author yezuoyao
  * @since 1.0-SNAPSHOT
  */
+
+
 @RestController
 @Slf4j
 public class DeviceController {
@@ -38,16 +41,30 @@ public class DeviceController {
         return "devices-access";
     }
 
+    /**
+     * 查询所有device
+     * @return
+     */
     @RequestMapping("/findAllDevice")
     public String findAllDevice(){
-        return JSON.toJSONString(deviceRepository.findAll());
+        return JsonResponseUtil.ok(deviceRepository.findAll());
     }
-
+    /**
+     * 查询单个deivece
+     */
     @RequestMapping("/findDeviceById")
     public String findDeviceById(@RequestParam(value = "id") String id){
-        return JSON.toJSONString(deviceRepository.findById(id));
+        return JsonResponseUtil.ok(deviceRepository.findById(id));
     }
 
+    /**
+     * 插入单个Device
+     * @param tenantId
+     * @param customId
+     * @param model
+     * @param name
+     * @return 返回device
+     */
     @RequestMapping("/insertDevice")
     public String insertDevice(@RequestParam(value = "tenantId",defaultValue = "-1") Integer tenantId,
                                @RequestParam(value = "customId",defaultValue = "-1") Integer customId,
@@ -55,9 +72,20 @@ public class DeviceController {
                                @RequestParam(value = "name") String name){
         Device device = deviceRepository.save(new Device(customId,customId,model,name));
         log.info("insert {}",device);
-        return JSON.toJSONString(device);
+        return JsonResponseUtil.ok(device);
     }
 
+    /**
+     * 按条件更新单个device，传只需要更新的字段，其他字段为null不传
+     * @param id
+     * @param tenantId
+     * @param customId
+     * @param model
+     * @param name
+     * @param nickname
+     * @param status
+     * @return 返回更新完 device
+     */
     @RequestMapping("/updateDevice")
     public String updateDevice(@RequestParam(value = "id") String id,
                                @RequestParam(value = "tenantId",required = false) Integer tenantId,
@@ -68,7 +96,7 @@ public class DeviceController {
                                @RequestParam(value = "status",required = false) String status){
         Optional<Device> optionalDevice =deviceRepository.findById(id);
         if(!optionalDevice.isPresent()){
-            return JSON.toJSONString(null);
+            return JsonResponseUtil.badResult("device不存在");
         }
         Device device = optionalDevice.get();
         if (tenantId != null){
@@ -86,17 +114,22 @@ public class DeviceController {
         }
         Device newDevice = deviceRepository.save(device);
         log.info("update {}",newDevice);
-        return JSON.toJSONString(newDevice);
+        return JsonResponseUtil.ok(newDevice);
     }
 
+    /**
+     * 删除单个device
+     * @param id
+     * @return
+     */
     @RequestMapping("/deleteDeviceById")
     public String DeleteById(@RequestParam(value = "id") String id){
         if(!deviceRepository.findById(id).isPresent()){
-            return JSON.toJSONString(null);
+            return JsonResponseUtil.badResult("device不存在");
         }
         deviceRepository.deleteById(id);
         log.info("delete {}",id);
-        return JSON.toJSONString(id);
+        return JsonResponseUtil.ok(id);
     }
 
 }
