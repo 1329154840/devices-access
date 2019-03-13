@@ -14,6 +14,10 @@ import java.lang.annotation.*;
  * @author yezuoyao
  * @since 1.0-SNAPSHOT
  */
+
+/**
+ * 方法前校验token，调取远端redis数据，接口由用户模块提供，restful接口
+ */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

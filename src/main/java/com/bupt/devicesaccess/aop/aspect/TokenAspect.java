@@ -1,24 +1,24 @@
 package com.bupt.devicesaccess.aop.aspect;
 
+import com.alibaba.fastjson.JSON;
 import com.bupt.devicesaccess.aop.Token;
+import com.bupt.devicesaccess.model.Group;
 import com.bupt.devicesaccess.utils.BadResultCode;
 import com.bupt.devicesaccess.utils.JsonResponseUtil;
-import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.JoinPoint;
+import lombok.extern.slf4j.Slf4j;;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.http.HttpRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -36,10 +36,19 @@ import java.lang.reflect.Method;
 @Component
 @Slf4j
 public class TokenAspect {
+    @Autowired
+    RestTemplate restTemplate;
+
     @Pointcut("@annotation(token)")
     public void service(Token token){
     }
 
+    /**
+     * 获取request，来得到cookie，通过restful校验token
+     * @param joinPoint
+     * @param token
+     * @return
+     */
     @Around("service(token)")
     public  Object Interceptor(ProceedingJoinPoint joinPoint, Token token){
         Object result = null;
@@ -48,11 +57,10 @@ public class TokenAspect {
                     .getRequestAttributes()).getRequest();
             Cookie[] cookies = request.getCookies();
            if(cookies!=null){
-               log.info("cookies not null");
                for (Cookie cookie:cookies){
-                   if (cookie.getName().equals("token") && cookie.getValue().equals("123")){
-                       result ="ok";
-                       log.info("token 验证成功");
+                   if ( cookie.getName().equals("token") && checkTokenByRestFul(cookie.getValue()) ){
+                           result ="ok";
+                           log.info("token 验证成功");
                    }
                }
            }
@@ -68,5 +76,21 @@ public class TokenAspect {
             result = JsonResponseUtil.badResult(BadResultCode.System_Error.getCode(), "发生异常："+e.getMessage());
         }
         return result;
+    }
+
+    /**
+     * 通过restful调取account服务的检查token接口(redis)
+     * @param token
+     * @return Boolean
+     */
+    private Boolean checkTokenByRestFul(String token){
+        String buffer[] = token.split("-");
+        if (buffer.length!=2){
+            return Boolean.FALSE;
+        }
+        String url = String.format("http://ACCOUNT/checkToken?uid=%s&token=%s",buffer[0],buffer[1]);
+        String json = restTemplate.getForObject(url, String.class);
+        Map<String,Object> result = JSON.parseObject(json);
+        return (Boolean)result.get("data");
     }
 }

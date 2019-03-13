@@ -29,6 +29,10 @@ import java.util.Map;
  * @author yezuoyao
  * @since 1.0-SNAPSHOT
  */
+
+/**
+ * 将设备分组存入，组内的crud操作（组内无需更新）
+ */
 @RestController
 @Slf4j
 public class GroupController {
@@ -48,7 +52,7 @@ public class GroupController {
     }
 
     /**
-     * 按groupId查询list的group
+     * 按groupId查询查整组记录 list<Group>
      * @param groupId
      * @return
      */

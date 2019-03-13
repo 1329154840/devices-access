@@ -30,7 +30,9 @@ import java.util.Optional;
  * @since 1.0-SNAPSHOT
  */
 
-
+/**
+ * 单个设备的crud操作
+ */
 @RestController
 @Slf4j
 public class DeviceController {
