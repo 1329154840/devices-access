@@ -1,6 +1,7 @@
 package com.bupt.devicesaccess.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.bupt.devicesaccess.aop.Token;
 import com.bupt.devicesaccess.dao.DeviceRepository;
 import com.bupt.devicesaccess.model.Device;
 import com.bupt.devicesaccess.utils.JsonResponseUtil;
@@ -36,9 +37,10 @@ public class DeviceController {
     @Autowired
     DeviceRepository deviceRepository;
 
+    @Token
     @RequestMapping("/")
     public String mainUrl(){
-        return "devices-access";
+        return JsonResponseUtil.ok("devices-access");
     }
 
     /**
@@ -65,6 +67,7 @@ public class DeviceController {
      * @param name
      * @return 返回device
      */
+
     @RequestMapping("/insertDevice")
     public String insertDevice(@RequestParam(value = "tenantId",defaultValue = "-1") Integer tenantId,
                                @RequestParam(value = "customId",defaultValue = "-1") Integer customId,

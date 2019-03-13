@@ -1,16 +1,21 @@
 package com.bupt.devicesaccess.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.bupt.devicesaccess.dao.GroupRepository;
+import com.bupt.devicesaccess.model.Device;
 import com.bupt.devicesaccess.model.Group;
+import com.bupt.devicesaccess.model.GroupKey;
 import com.bupt.devicesaccess.utils.JsonResponseUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -29,6 +34,9 @@ import java.util.List;
 public class GroupController {
     @Autowired
     GroupRepository groupRepository;
+
+    @Autowired
+    RestTemplate restTemplate;
 
     /**
      * 查询所有组
@@ -112,6 +120,16 @@ public class GroupController {
         return JsonResponseUtil.ok(groupId);
     }
 
+
+    @RequestMapping("restful")
+    public String restful(){
+        String url = "http://DEVICES-ACCESS/findAllGroup";
+        String json = restTemplate.getForObject(url, String.class);
+        Map<String,Object> result = JSON.parseObject(json);
+        List<Group> groupList = (List<Group>)result.get("data");
+        log.info("restful {}",groupList);
+        return JsonResponseUtil.ok(groupList);
+    }
 
 
 }
