@@ -1,15 +1,14 @@
 package com.bupt.devicesaccess.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.bupt.devicesaccess.dao.GroupRepository;
-import com.bupt.devicesaccess.model.Device;
 import com.bupt.devicesaccess.model.Group;
-import com.bupt.devicesaccess.model.GroupKey;
 import com.bupt.devicesaccess.utils.JsonResponseUtil;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
@@ -35,6 +34,7 @@ import java.util.Map;
  */
 @RestController
 @Slf4j
+@RequestMapping("/group")
 public class GroupController {
     @Autowired
     GroupRepository groupRepository;
@@ -46,8 +46,9 @@ public class GroupController {
      * 查询所有组
      * @return
      */
-    @RequestMapping("/findAllGroup")
-    public String findAllGroup(){
+    @RequestMapping(value = "/findAll", method = RequestMethod.GET)
+    @ApiOperation(value="findAll", notes="查询所有组")
+    public String findAll(){
         return JsonResponseUtil.ok(groupRepository.findAll());
     }
 
@@ -56,7 +57,8 @@ public class GroupController {
      * @param groupId
      * @return
      */
-    @RequestMapping("/findByGroupId")
+    @RequestMapping(value = "/findByGroupId", method = RequestMethod.GET)
+    @ApiOperation(value="findByGroupId", notes="按groupId查询查整组记录")
     public String findByGroupId(@RequestParam(value = "groupId") String groupId){
         return JsonResponseUtil.ok(groupRepository.findByGroupId(groupId));
     }
@@ -66,10 +68,11 @@ public class GroupController {
      * @param deviceId
      * @return
      */
-    @RequestMapping("/insertNewGroup")
-    public String insertNewGroup(@RequestParam(value = "deviceId") String deviceId){
+    @RequestMapping(value = "/insertNew", method = {RequestMethod.GET,RequestMethod.POST})
+    @ApiOperation(value="insertNew", notes="插入新的组")
+    public String insertNew(@RequestParam(value = "deviceId") String deviceId){
         Group group = groupRepository.save(new Group(deviceId));
-        log.info("New insert {}", group);
+        log.info("insertNew {}", group);
         return JsonResponseUtil.ok(group);
     }
 
@@ -79,15 +82,16 @@ public class GroupController {
      * @param deviceId
      * @return
      */
-    @RequestMapping("/insertOldGroup")
-    public String insertOldGroup(@RequestParam(value = "groupId") String groupId,
+    @RequestMapping(value = "/insertOld", method = {RequestMethod.GET,RequestMethod.POST})
+    @ApiOperation(value="insertOld", notes="插入已存在的组")
+    public String insertOld(@RequestParam(value = "groupId") String groupId,
                                  @RequestParam(value = "deviceId") String deviceId){
         if(groupRepository.findByGroupId(groupId).isEmpty()){
             return JsonResponseUtil.badResult("group不存在");
         }
 
         Group group = groupRepository.save( new Group( groupId, deviceId));
-        log.info("Old insert {}", group);
+        log.info("insertOld {}", group);
         return JsonResponseUtil.ok(group);
     }
 
@@ -97,14 +101,15 @@ public class GroupController {
      * @param deviceId
      * @return
      */
-    @RequestMapping("/deleteGroupByPrimaryKey")
-    public String deleteGroupByPrimaryKey(@RequestParam(value = "groupId") String groupId,
+    @RequestMapping(value = "/deleteByPrimaryKey", method = {RequestMethod.GET,RequestMethod.POST})
+    @ApiOperation(value="deleteByPrimaryKey", notes="删除组内单条记录")
+    public String deleteByPrimaryKey(@RequestParam(value = "groupId") String groupId,
                               @RequestParam(value = "deviceId") String deviceId){
         Group group = groupRepository.findByPrimaryKey(groupId,deviceId);
         if (group == null){
             return JsonResponseUtil.badResult("group不存在");
         }
-        log.info("delete {}", group);
+        log.info("deleteSingleGroup {}", group);
         groupRepository.delete(group);
         return JsonResponseUtil.ok(group);
     }
@@ -114,18 +119,19 @@ public class GroupController {
      * @param groupId
      * @return
      */
-    @RequestMapping("deleteGroupByGroupId")
-    public String deleteGroupByGroupId(@RequestParam(value = "groupId") String groupId){
+    @RequestMapping(value = "/deleteByGroupId", method = {RequestMethod.GET,RequestMethod.POST})
+    @ApiOperation(value="deleteByGroupId", notes="根据GroupId删除整组")
+    public String deleteByGroupId(@RequestParam(value = "groupId") String groupId){
         if (groupRepository.findByGroupId(groupId).isEmpty()){
             return JsonResponseUtil.badResult("group不存在");
         }
         groupRepository.deleteGroupByGroupId(groupId);
-        log.info("delete group {}", groupId);
+        log.info("deleteGroupList {}", groupId);
         return JsonResponseUtil.ok(groupId);
     }
 
 
-    @RequestMapping("restful")
+    @RequestMapping(value = "/restful", method = RequestMethod.GET)
     public String restful(){
         String url = "http://DEVICES-ACCESS/findAllGroup";
         String json = restTemplate.getForObject(url, String.class);
