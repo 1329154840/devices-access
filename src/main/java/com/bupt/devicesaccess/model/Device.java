@@ -26,26 +26,26 @@ public class Device {
     private String id;
     @Column("customer_id")
     private Integer customId;
-    @Column("tenant_id")
-    private Integer tenantId;
+    @Column("group_id")
+    private String groupId;
     private String model;
     private String name;
     private String nickname;
     private String status;
 
-    public Device(Integer tenantId,Integer customId,String model, String name) {
+    public Device(String groupId,Integer customId,String model, String name) {
         this.id = UUID.randomUUID().toString();
         this.customId = customId;
-        this.tenantId = tenantId;
+        this.groupId = groupId;
         this.model = model;
         this.name = name;
         this.status = "关机";
     }
 
-    public Device(String id, Integer customId, Integer tenantId, String model, String name, String nickname, String status) {
+    public Device(String id, Integer customId, String groupId, String model, String name, String nickname, String status) {
         this.id = id;
         this.customId = customId;
-        this.tenantId = tenantId;
+        this.groupId = groupId;
         this.model = model;
         this.name = name;
         this.nickname = nickname;

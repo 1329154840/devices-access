@@ -3,6 +3,9 @@ package com.bupt.devicesaccess.dao;
 import com.bupt.devicesaccess.model.Device;
 import org.springframework.data.cassandra.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -17,4 +20,20 @@ import org.springframework.data.repository.CrudRepository;
  * @since 1.0-SNAPSHOT
  */
 public interface DeviceRepository extends CrudRepository<Device,String> {
+    String SELECT = "SELECT id,customer_id,group_id,model,name,nickname,status FROM device ";
+
+    @Query(SELECT + "WHERE customer_id = :custom_id")
+    List<Device> findFreeAll();
+
+    @Query(SELECT + "WHERE customer_id = :custom_id ")
+    List<Device> findByCustomId(@Param("custom_id") Integer customId);
+
+    @Query(SELECT + "WHERE customer_id = :custom_id And group_id = :group_id ")
+    List<Device> findByCustomIdAndGroupId(@Param("custom_id") Integer customId, @Param("group_id") String groupId);
+
+    @Query("SELECT DISTINCT group_id FROM device WHERE customer_id = :custom_id ")
+    List<String> findGroupId(@Param("custom_id") Integer customId);
+
+    @Query(SELECT)
+    List<Device> findAll();
 }

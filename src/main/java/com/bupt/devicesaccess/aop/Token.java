@@ -18,12 +18,17 @@ import java.lang.annotation.*;
 /**
  * 方法前校验token，调取远端redis数据，接口由用户模块提供，restful接口
  */
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Token {
     /**
-     *  是否启用
+     * 角色，默认是user
+     * @return
+     */
+    String role() default "user";
+    /**
+     * 是否启用，默认启用
      * @return
      */
     boolean value() default true;

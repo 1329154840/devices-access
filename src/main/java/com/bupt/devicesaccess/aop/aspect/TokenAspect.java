@@ -2,7 +2,6 @@ package com.bupt.devicesaccess.aop.aspect;
 
 import com.alibaba.fastjson.JSON;
 import com.bupt.devicesaccess.aop.Token;
-import com.bupt.devicesaccess.model.Group;
 import com.bupt.devicesaccess.utils.BadResultCode;
 import com.bupt.devicesaccess.utils.JsonResponseUtil;
 import lombok.extern.slf4j.Slf4j;;
@@ -58,7 +57,7 @@ public class TokenAspect {
             Cookie[] cookies = request.getCookies();
            if(cookies!=null){
                for (Cookie cookie:cookies){
-                   if ( cookie.getName().equals("token") && checkTokenByRestFul(cookie.getValue()) ){
+                   if ( cookie.getName().equals("token") && checkTokenByRestFul( cookie.getValue(), token.role())){
                            result ="ok";
                            log.info("token 验证成功");
                    }
@@ -81,16 +80,31 @@ public class TokenAspect {
     /**
      * 通过restful调取account服务的检查token接口(redis)
      * @param token
+     * @param role
      * @return Boolean
      */
-    private Boolean checkTokenByRestFul(String token){
+    private Boolean checkTokenByRestFul(String token, String role){
         String buffer[] = token.split("-");
+        String result ="";
+        String url ="";
         if (buffer.length!=2){
             return Boolean.FALSE;
         }
-        String url = String.format("http://ACCOUNT/checkToken?uid=%s&token=%s",buffer[0],buffer[1]);
-        String json = restTemplate.getForObject(url, String.class);
-        Map<String,Object> result = JSON.parseObject(json);
-        return (Boolean)result.get("data");
+        if (role.equals("user")){
+            url = String.format("http://ACCOUNT/checkAdminToken?uid=%s&token=%s",buffer[0],buffer[1]);
+        }
+        if (role.equals("admin")){
+            url = String.format("http://ACCOUNT/checkUserToken?uid=%s&token=%s",buffer[0],buffer[1]);
+        }
+        try {
+            result = restTemplate.getForObject(url, String.class);
+        } catch (Exception e){
+            log.error("{}",e.getMessage());
+            return Boolean.FALSE;
+        }
+        if (result.equals("true")){
+            return Boolean.TRUE;
+        }
+        return Boolean.FALSE;
     }
 }
