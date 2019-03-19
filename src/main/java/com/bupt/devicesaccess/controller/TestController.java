@@ -15,22 +15,17 @@ import org.springframework.web.bind.annotation.RestController;
  * Date: 2019-03-16
  * Time: 08:06
  * Email:yezuoyao@huli.com
- *
+ * 测试
  * @author yezuoyao
  * @since 1.0-SNAPSHOT
- */
-
-/**
- * 测试
  */
 @RestController
 @RequestMapping("/")
 public class TestController {
-    @Token(role = "admin")
     @RequestMapping(value = "/",method = RequestMethod.GET)
     @ApiOperation(value="mainUrl", notes="这只是一个测试controller调用的接口，没有任何的业务逻辑")
     public String mainUrl(){
-        return JsonResponseUtil.ok("devices-access");
+        return JsonResponseUtil.ok("欢迎使用 devices-access，请访问swagger-ui.html获取接口信息");
     }
 
 }

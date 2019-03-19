@@ -26,10 +26,6 @@ public @interface Token {
      * 角色，默认是user
      * @return
      */
-    String role() default "user";
-    /**
-     * 是否启用，默认启用
-     * @return
-     */
-    boolean value() default true;
+    String value() default "user";
+
 }

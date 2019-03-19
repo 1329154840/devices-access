@@ -33,23 +33,14 @@ public class Device {
     private String nickname;
     private String status;
 
-    public Device(String groupId,Integer customId,String model, String name) {
+    public Device(String model, String name) {
         this.id = UUID.randomUUID().toString();
-        this.customId = customId;
-        this.groupId = groupId;
+        this.groupId = "-1";
+        this.customId = -1;
+        this.nickname = "";
         this.model = model;
         this.name = name;
         this.status = "关机";
-    }
-
-    public Device(String id, Integer customId, String groupId, String model, String name, String nickname, String status) {
-        this.id = id;
-        this.customId = customId;
-        this.groupId = groupId;
-        this.model = model;
-        this.name = name;
-        this.nickname = nickname;
-        this.status = status;
     }
     public Device() {
     }

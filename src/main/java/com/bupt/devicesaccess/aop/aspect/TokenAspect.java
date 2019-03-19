@@ -51,18 +51,16 @@ public class TokenAspect {
     @Around("service(token)")
     public  Object Interceptor(ProceedingJoinPoint joinPoint, Token token){
         Object result = null;
-        if(token.value()){
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
-                    .getRequestAttributes()).getRequest();
-            Cookie[] cookies = request.getCookies();
-           if(cookies!=null){
-               for (Cookie cookie:cookies){
-                   if ( cookie.getName().equals("token") && checkTokenByRestFul( cookie.getValue(), token.role())){
-                           result ="ok";
-                           log.info("token 验证成功");
-                   }
-               }
-           }
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
+                .getRequestAttributes()).getRequest();
+        Cookie[] cookies = request.getCookies();
+        if(cookies!=null){
+            for (Cookie cookie:cookies){
+                if ( cookie.getName().equals("token") && checkTokenByRestFul( cookie.getValue(), token.value())){
+                    result ="ok";
+                    log.info("token 验证成功");
+                }
+            }
         }
         try{
             if("ok".equals(result)){
@@ -87,14 +85,14 @@ public class TokenAspect {
         String buffer[] = token.split("-");
         String result ="";
         String url ="";
-        if (buffer.length!=2){
+        if (buffer.length!=3){
             return Boolean.FALSE;
         }
         if (role.equals("user")){
-            url = String.format("http://ACCOUNT/checkAdminToken?uid=%s&token=%s",buffer[0],buffer[1]);
+            url = String.format("http://ACCOUNT/check?uid=%s&type=%d&uuid=%s",buffer[0],1,buffer[1]);
         }
         if (role.equals("admin")){
-            url = String.format("http://ACCOUNT/checkUserToken?uid=%s&token=%s",buffer[0],buffer[1]);
+            url = String.format("http://ACCOUNT/check?uid=%s&type=%d&uuid=%s",buffer[0],0,buffer[1]);
         }
         try {
             result = restTemplate.getForObject(url, String.class);
