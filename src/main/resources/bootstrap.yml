@@ -3,10 +3,11 @@ spring:
     name: devices-access
   cloud:
     config:
-      discovery:
-        enabled: true
-        service-id: CONFIG
       profile: dev
+      uri:  http://114.115.130.42:1111
+#      discovery:
+#        enabled: true
+#        service-id: config
 server:
   port: 8083
 eureka:
@@ -15,4 +16,4 @@ eureka:
       defaultZone: http://114.115.130.42:8761/eureka/
   instance:
     prefer-ip-address: true
-    instance-id: 114.115.130.42:${server.port}
+    instance-id: localhost:${server.port}
