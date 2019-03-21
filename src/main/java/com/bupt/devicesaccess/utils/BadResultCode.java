@@ -14,7 +14,7 @@ package com.bupt.devicesaccess.utils;
  */
 public enum BadResultCode {
 
-    Token_Access_Fail(2,"token校验失败"),
+    Token_Access_Fail(2,"Toekn 认证失败，你没有权限"),
 
     Device_Is_Null(3,"device不存在"),
 
