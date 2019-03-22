@@ -23,7 +23,7 @@ public interface DeviceRepository extends CrudRepository<Device,String> {
     String SELECT = "SELECT id,customer_id,group_id,model,name,nickname,status FROM device ";
 
     @Query(SELECT + "WHERE customer_id = :custom_id")
-    List<Device> findFreeAll();
+    List<Device> findFreeAll(@Param("custom_id") Integer customId);
 
     @Query(SELECT + "WHERE customer_id = :custom_id ")
     List<Device> findByCustomId(@Param("custom_id") Integer customId);

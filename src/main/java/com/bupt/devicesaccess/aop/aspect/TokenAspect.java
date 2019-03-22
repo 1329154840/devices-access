@@ -35,6 +35,8 @@ import java.util.Map;
 @Component
 @Slf4j
 public class TokenAspect {
+    private String urlFomat = "http://restful/device/check?uid=%s&type=%d&uuid=%s";
+
     @Autowired
     RestTemplate restTemplate;
 
@@ -89,14 +91,13 @@ public class TokenAspect {
             return Boolean.FALSE;
         }
         if (role.equals("user")){
-            url = String.format("http://ACCOUNT/device/check?uid=%s&type=%d&uuid=%s",buffer[0],1,buffer[1]);
+            url = String.format(urlFomat,buffer[0],1,buffer[1]);
         }
         if (role.equals("admin")){
-            url = String.format("http://ACCOUNT/device/check?uid=%s&type=%d&uuid=%s",buffer[0],0,buffer[1]);
+            url = String.format(urlFomat,buffer[0],0,buffer[1]);
         }
         try {
             result = restTemplate.getForObject(url, String.class);
-            log.info("{}",result);
         } catch (Exception e){
             log.error("{}",e.getMessage());
             return Boolean.FALSE;

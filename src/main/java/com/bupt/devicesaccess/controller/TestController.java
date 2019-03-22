@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/")
 public class TestController {
+    @Token
     @RequestMapping(value = "/",method = RequestMethod.GET)
     @ApiOperation(value="mainUrl", notes="这只是一个测试controller调用的接口，没有任何的业务逻辑")
     public String mainUrl(){
