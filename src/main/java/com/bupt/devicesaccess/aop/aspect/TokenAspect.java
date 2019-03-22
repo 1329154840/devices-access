@@ -35,7 +35,7 @@ import java.util.Map;
 @Component
 @Slf4j
 public class TokenAspect {
-    private String urlFomat = "http://restful/device/check?uid=%s&type=%d&uuid=%s";
+    private String urlFomat = "http://account/device/check?uid=%s&type=%d&uuid=%s";
 
     @Autowired
     RestTemplate restTemplate;
