@@ -17,5 +17,5 @@ eureka:
   instance:
     prefer-ip-address: true
     instance-id: ${eureka.instance.ip-address}:${spring.application.name}:${server.port}
-    ip-address: 127.0.0.1
+    ip-address: 114.115.130.42
 
