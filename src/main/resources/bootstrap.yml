@@ -4,10 +4,9 @@ spring:
   cloud:
     config:
       profile: dev
-      uri:  http://114.115.130.42:1111
-#      discovery:
-#        enabled: true
-#        service-id: config
+      discovery:
+        enabled: true
+        service-id: config
 server:
   port: 8083
 eureka:
