@@ -6,7 +6,6 @@ import com.bupt.devicesaccess.utils.BadResultCode;
 import com.bupt.devicesaccess.utils.JsonResponseUtil;
 import com.bupt.devicesaccess.utils.RequestUtils;
 import io.swagger.annotations.ApiOperation;
-import jnr.ffi.annotations.In;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,7 +38,7 @@ public class UserController {
      * 查询未绑定的所有空设备
      * @return
      */
-    @Token
+//    @Token
     @RequestMapping(value = "/findFreeAll", method = RequestMethod.GET)
     @ApiOperation(value="findFreeAll", notes="查询自己拥有的所有device")
     public String findFreeAll(){
@@ -50,7 +49,7 @@ public class UserController {
      * 查询自己拥有的所有设备
      * @return
      */
-    @Token
+//    @Token
     @RequestMapping(value = "/findAll", method = RequestMethod.GET)
     @ApiOperation(value="findAll", notes="查询自己拥有的所有device")
     public String findAll(){
@@ -61,7 +60,7 @@ public class UserController {
      * 查询自己拥有的组号
      * @return
      */
-    @Token
+//    @Token
     @RequestMapping(value = "/findGroupId", method = RequestMethod.GET)
     @ApiOperation(value="findGroupId", notes="查询自己拥有的组号")
     public String findGroupId(){
@@ -72,7 +71,7 @@ public class UserController {
      * 查询自己拥有对应组的device
      * @return
      */
-    @Token
+//    @Token
     @RequestMapping(value = "/findByGroupId", method = RequestMethod.GET)
     @ApiOperation(value="findByGroupId", notes="查询自己拥有对应组的device")
     public String findByGroupId(@RequestParam(value = "groupId") String groupId){
@@ -82,6 +81,7 @@ public class UserController {
     /**
      * 查询单个device
      */
+//    @Token
     @RequestMapping(value = "/findById", method = RequestMethod.GET)
     @ApiOperation(value="findById", notes="查询单个device")
     public String findById(@RequestParam(value = "id") String id){
@@ -91,7 +91,7 @@ public class UserController {
      * 将新建空设备，拉入自己组下
      * @return 返回device
      */
-    @Token
+//    @Token
     @RequestMapping(value = "/insert", method = {RequestMethod.GET,RequestMethod.POST})
     @ApiOperation(value="insert", notes="将新建空设备，拉入自己组下")
     public String insert(@RequestParam(value = "id") String id,
@@ -117,7 +117,7 @@ public class UserController {
      * @param status
      * @return 返回更新完 device
      */
-    @Token
+//    @Token
     @RequestMapping(value = "/update", method = {RequestMethod.GET,RequestMethod.POST})
     @ApiOperation(value="update", notes="按条件更新单个device，传只需要更新的字段，其他字段为null不传")
     public String update(@RequestParam(value = "id") String id,
@@ -145,7 +145,7 @@ public class UserController {
      * @param id
      * @return
      */
-    @Token
+//    @Token
     @RequestMapping(value = "/deleteById", method = {RequestMethod.GET,RequestMethod.POST})
     @ApiOperation(value="deleteById", notes="解绑该设备")
     public String deleteById(@RequestParam(value = "id") String id){

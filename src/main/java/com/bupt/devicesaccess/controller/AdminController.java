@@ -39,7 +39,7 @@ public class AdminController {
      * 查询所有device
      * @return
      */
-    @Token("admin")
+//    @Token("admin")
     @RequestMapping(value = "/findAll", method = RequestMethod.GET)
     @ApiOperation(value="findAll", notes="查询所有device")
     public String findAll(){
@@ -54,7 +54,7 @@ public class AdminController {
      * @param status 选填
      * @return
      */
-    @Token("admin")
+//    @Token("admin")
     @RequestMapping(value = "/insert", method = RequestMethod.GET)
     @ApiOperation(value="insert", notes="新建设备")
     public String insert(@RequestParam(value = "name") String name,
@@ -87,7 +87,7 @@ public class AdminController {
      * @param status
      * @return
      */
-    @Token("admin")
+//    @Token("admin")
     @RequestMapping(value = "/updateById", method = RequestMethod.GET)
     @ApiOperation(value="updateById", notes="按条件跟新设备，除了id，其他选填")
     public String updateById(@RequestParam("id") String id,
@@ -122,7 +122,7 @@ public class AdminController {
      * @param id
      * @return
      */
-    @Token("admin")
+//    @Token("admin")
     @RequestMapping(value = "/deleteById", method = RequestMethod.GET)
     @ApiOperation(value="deleteById", notes="通过id删除设备")
     public String deleteById(@RequestParam("id") String id){
