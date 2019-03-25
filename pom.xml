@@ -86,6 +86,15 @@
             <artifactId>swagger-models</artifactId>
             <version>1.5.21</version>
         </dependency>
+        <!--mqtt-->
+        <dependency>
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-stream</artifactId>
+        </dependency>MqttReceiveConfig
+        <dependency>
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-mqtt</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
