@@ -8,7 +8,7 @@ spring:
         enabled: true
         service-id: config
 server:
-  port: 8083
+  port: 8085
 eureka:
   client:
     service-url:
@@ -17,4 +17,3 @@ eureka:
     prefer-ip-address: true
     instance-id: ${eureka.instance.ip-address}:${spring.application.name}:${server.port}
     ip-address: 127.0.0.1
-
