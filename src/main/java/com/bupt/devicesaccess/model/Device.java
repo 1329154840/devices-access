@@ -40,7 +40,7 @@ public class Device {
         this.nickname = "";
         this.model = model;
         this.name = name;
-        this.status = "关机";
+        this.status = "OFF";
     }
     public Device() {
     }

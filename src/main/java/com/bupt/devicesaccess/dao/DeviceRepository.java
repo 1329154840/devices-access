@@ -34,4 +34,6 @@ public interface DeviceRepository extends CrudRepository<Device,String> {
     @Query("SELECT DISTINCT group_id FROM device WHERE customer_id = :custom_id ")
     List<String> findGroupId(@Param("custom_id") Integer customId);
 
+    @Query("UPDATE device SET status = :status WHERE id = :id ")
+    void updateById(@Param("id") String id, @Param("status") String status);
 }

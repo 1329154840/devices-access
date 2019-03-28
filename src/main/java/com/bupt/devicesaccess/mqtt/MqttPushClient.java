@@ -13,6 +13,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
  * Time: 16:44
  * Email:yezuoyao@huli.com
  *
+ * 提供mqtt的 订阅 和 发布
  * @author yezuoyao
  * @since 1.0-SNAPSHOT
  */
@@ -40,7 +41,7 @@ public class MqttPushClient {
             options.setKeepAliveInterval(keepalive);
             MqttPushClient.setClient(client);
             try {
-                client.setCallback(new PushCallback());
+                client.setCallback(new ReceiverCallback());
                 client.connect(options);
                 for (String topic : topics){
                     subscribe(topic);

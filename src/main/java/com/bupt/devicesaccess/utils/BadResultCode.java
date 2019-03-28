@@ -12,15 +12,22 @@ package com.bupt.devicesaccess.utils;
  * @author yezuoyao
  * @since 1.0-SNAPSHOT
  */
-public enum BadResultCode {
 
+public enum BadResultCode {
+    /**
+     * BadResultCode
+     */
     Token_Access_Fail(2,"Toekn 认证失败，你没有权限"),
 
     Device_Is_Null(3,"device不存在"),
 
     Group_Is_Null(4,"group不存在"),
 
-    System_Error(5,"系统异常");
+    System_Error(5,"系统异常"),
+
+    Rule_Upload_Error(6,"规则上传失败"),
+
+    Rule_Json_Error(7, "json解析错误");
 
 
     BadResultCode(Integer code, String remark) {

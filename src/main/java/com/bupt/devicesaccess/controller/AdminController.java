@@ -134,4 +134,12 @@ public class AdminController {
         log.info("deleteDevice {}",id);
         return JsonResponseUtil.ok(id);
     }
+
+    @RequestMapping(value = "/deleteAll", method = RequestMethod.GET)
+    @ApiOperation(value="deleteAll", notes="删除所有设备")
+    public String deleteAll(){
+        deviceRepository.deleteAll();
+        log.info("deleteDeviceAll");
+        return JsonResponseUtil.ok();
+    }
 }
