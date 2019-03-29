@@ -1,7 +1,10 @@
 package com.bupt.devicesaccess.controller;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import com.bupt.devicesaccess.aop.Token;
 import com.bupt.devicesaccess.dao.DeviceRepository;
 import com.bupt.devicesaccess.model.Device;
+import com.bupt.devicesaccess.schedule.RuleSchedule;
 import com.bupt.devicesaccess.utils.BadResultCode;
 import com.bupt.devicesaccess.utils.JsonResponseUtil;
 import com.bupt.devicesaccess.utils.RequestUtils;
@@ -32,7 +35,10 @@ import java.util.Optional;
 @RequestMapping("/user")
 public class UserController {
     @Autowired
-    DeviceRepository deviceRepository;
+    private DeviceRepository deviceRepository;
+
+    @Autowired
+    private RuleSchedule ruleSchedule;
 
     /**
      * 查询未绑定的所有空设备
@@ -162,6 +168,35 @@ public class UserController {
         Device newDevice = deviceRepository.save(device);
         log.info("uid:{} deleteDevice:{}",uid,id);
         return JsonResponseUtil.ok(newDevice);
+    }
+
+    /**
+     * 上传规则,启用定时任务
+     * @param rule
+     * @return
+     */
+    @RequestMapping(value = "/upload",method = RequestMethod.GET)
+    @ApiOperation(value="upload", notes="上传规则")
+    public String upload(@RequestParam String rule){
+        String result;
+        try {
+            JSONObject jsonRule =JSONObject.parseObject(rule);
+            result =ruleSchedule.adapter("123", jsonRule);
+        } catch (JSONException e){
+            log.error("json 解析有误");
+            return JsonResponseUtil.badResult( BadResultCode.Rule_Json_Error.getCode(), BadResultCode.Rule_Json_Error.getRemark());
+        }
+        return result;
+    }
+
+    /**
+     * 获取个人定时任务
+     * @return
+     */
+    @RequestMapping(value = "/getJob", method = RequestMethod.GET)
+    @ApiOperation(value="getJob", notes="获取个人定时任务")
+    public String getJob(){
+        return ruleSchedule.printJobByOpenId();
     }
 
 }

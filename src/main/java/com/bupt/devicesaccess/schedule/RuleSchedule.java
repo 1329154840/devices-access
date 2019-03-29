@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.bupt.devicesaccess.model.RuleJobsVO;
 import com.bupt.devicesaccess.utils.BadResultCode;
 import com.bupt.devicesaccess.utils.JsonResponseUtil;
+import com.bupt.devicesaccess.utils.RequestUtils;
+import jdk.nashorn.internal.ir.RuntimeNode;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.quartz.impl.JobDetailImpl;
@@ -80,10 +82,10 @@ public class RuleSchedule{
     }
 
     /**
-     * 输出即将执行的定时任务
+     * 输出所有定时任务
      * @return
      */
-    public String printJob(){
+    public String printAllJob(){
         List<RuleJobsVO> ruleJobsVOList = new ArrayList<>();
         try {
             List<String> triggerGroupNames = scheduler.getTriggerGroupNames();
@@ -116,11 +118,56 @@ public class RuleSchedule{
                 }
             }
         }catch (Exception e){
-            log.error("printJob异常 {}", e.getMessage());
+            log.error("printAllJob异常 {}", e.getMessage());
             return JsonResponseUtil.badResult(BadResultCode.System_Error.getCode(), BadResultCode.System_Error.getRemark());
         }
         return JsonResponseUtil.ok(ruleJobsVOList);
     }
+
+    public String printJobByOpenId(){
+        List<RuleJobsVO> ruleJobsVOList = new ArrayList<>();
+        try {
+            List<String> triggerGroupNames = scheduler.getTriggerGroupNames();
+            for(String groupName: triggerGroupNames){
+                /**
+                 *组装group的匹配，为了模糊获取所有的triggerKey或者jobKey
+                 */
+                if(groupName.equals(RequestUtils.getOpenId())){
+                    GroupMatcher groupMatcher = GroupMatcher.groupEquals(groupName);
+                    //获取所有的triggerKey
+                    Set<TriggerKey> triggerKeySet = scheduler.getTriggerKeys(groupMatcher);
+                    for (TriggerKey triggerKey : triggerKeySet) {
+                        /**
+                         * 通过triggerKey在scheduler中获取trigger对象
+                         */
+                        Trigger trigger =scheduler.getTrigger(triggerKey);
+                        /**
+                         * 获取trigger拥有的Job
+                         */
+                        JobKey jobKey = trigger.getJobKey();
+                        JobDetailImpl jobDetailImpl = (JobDetailImpl) scheduler.getJobDetail(jobKey);
+                        /**
+                         * 组装页面需要显示的数据
+                         */
+                        RuleJobsVO ruleJobsVO = new RuleJobsVO();
+                        ruleJobsVO.setGroupName(groupName);
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        ruleJobsVO.setJobStartTime(sdf.format(trigger.getStartTime()));
+                        ruleJobsVO.setJobDetailName(jobDetailImpl.getName());
+                        ruleJobsVOList.add(ruleJobsVO);
+                    }
+                }
+            }
+        }catch (Exception e){
+            log.error("printJobByCustomerId异常 {}", e.getMessage());
+            return JsonResponseUtil.badResult(BadResultCode.System_Error.getCode(), BadResultCode.System_Error.getRemark());
+        }
+        return JsonResponseUtil.ok(ruleJobsVOList);
+    }
+
+
+
+
 
 
 

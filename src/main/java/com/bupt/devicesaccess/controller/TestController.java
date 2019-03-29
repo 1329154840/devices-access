@@ -52,33 +52,19 @@ public class TestController {
     @ApiOperation(value="mqttPublish", notes="mqtt发送Publish,默认qos为0")
     public String mqttPublish(@RequestParam(value = "messange", defaultValue = "hello mqtt server")  String messange){
         mqttPushClient.publish("/World",messange);
-        return JsonResponseUtil.ok("6666");
+        return JsonResponseUtil.ok("mqtt发送:" + messange);
     }
 
-    @RequestMapping(value = "/upload",method = RequestMethod.GET)
-    @ApiOperation(value="upload", notes="上传规则")
-    public String upload(@RequestParam String rule){
-        String result;
-        try {
-            JSONObject jsonRule =JSONObject.parseObject(rule);
-            result =ruleSchedule.adapter("123", jsonRule);
-        } catch (JSONException e){
-            log.error("json 解析有误");
-            return JsonResponseUtil.badResult( BadResultCode.Rule_Json_Error.getCode(), BadResultCode.Rule_Json_Error.getRemark());
-        }
-        return result;
-    }
-
-    @RequestMapping(value = "/getJob",method = RequestMethod.GET)
-    public String getJob(){
-        return ruleSchedule.printJob();
-    }
-
-    @RequestMapping(value = "/date",method = RequestMethod.GET)
-    public String date(){
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-        return JsonResponseUtil.ok(sdf.format(DateBuilder.dateOf(17,12,3)));
-    }
+//    @RequestMapping(value = "/getJob",method = RequestMethod.GET)
+//    public String getJob(){
+//        return ruleSchedule.printJob();
+//    }
+//
+//    @RequestMapping(value = "/date",method = RequestMethod.GET)
+//    public String date(){
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//
+//        return JsonResponseUtil.ok(sdf.format(DateBuilder.dateOf(17,12,3)));
+//    }
 
 }

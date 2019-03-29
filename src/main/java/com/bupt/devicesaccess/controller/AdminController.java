@@ -3,6 +3,7 @@ package com.bupt.devicesaccess.controller;
 import com.bupt.devicesaccess.aop.Token;
 import com.bupt.devicesaccess.dao.DeviceRepository;
 import com.bupt.devicesaccess.model.Device;
+import com.bupt.devicesaccess.schedule.RuleSchedule;
 import com.bupt.devicesaccess.utils.BadResultCode;
 import com.bupt.devicesaccess.utils.JsonResponseUtil;
 import io.swagger.annotations.ApiOperation;
@@ -33,7 +34,10 @@ import java.util.Optional;
 @RequestMapping("/admin")
 public class AdminController {
     @Autowired
-    DeviceRepository deviceRepository;
+    private DeviceRepository deviceRepository;
+
+    @Autowired
+    private RuleSchedule ruleSchedule;
 
     /**
      * 查询所有device
@@ -135,11 +139,25 @@ public class AdminController {
         return JsonResponseUtil.ok(id);
     }
 
+    /**
+     * 一键删除所有设备
+     * @return
+     */
     @RequestMapping(value = "/deleteAll", method = RequestMethod.GET)
     @ApiOperation(value="deleteAll", notes="删除所有设备")
     public String deleteAll(){
         deviceRepository.deleteAll();
         log.info("deleteDeviceAll");
         return JsonResponseUtil.ok();
+    }
+
+    /**
+     * 获取所有定时任务
+     * @return
+     */
+    @RequestMapping(value = "/getJob", method = RequestMethod.GET)
+    @ApiOperation(value="getJob", notes="获取所有任务")
+    public String getJob(){
+        return ruleSchedule.printJobByOpenId();
     }
 }
