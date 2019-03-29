@@ -27,7 +27,9 @@ public enum BadResultCode {
 
     Rule_Upload_Error(6,"规则上传失败"),
 
-    Rule_Json_Error(7, "json解析错误");
+    Rule_Json_Error(7, "json解析错误"),
+
+    Date_Error(8, "date解析错误");
 
 
     BadResultCode(Integer code, String remark) {

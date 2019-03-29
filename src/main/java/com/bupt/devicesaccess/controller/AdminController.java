@@ -6,14 +6,20 @@ import com.bupt.devicesaccess.model.Device;
 import com.bupt.devicesaccess.schedule.RuleSchedule;
 import com.bupt.devicesaccess.utils.BadResultCode;
 import com.bupt.devicesaccess.utils.JsonResponseUtil;
+import com.bupt.devicesaccess.utils.RequestUtils;
+import com.sun.xml.internal.ws.spi.db.DatabindingException;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.cert.ocsp.Req;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 
 /**
@@ -155,9 +161,50 @@ public class AdminController {
      * 获取所有定时任务
      * @return
      */
-    @RequestMapping(value = "/getJob", method = RequestMethod.GET)
-    @ApiOperation(value="getJob", notes="获取所有任务")
-    public String getJob(){
-        return ruleSchedule.printJobByOpenId();
+    @RequestMapping(value = "/getAllJob", method = RequestMethod.GET)
+    @ApiOperation(value="getAllJob", notes="获取所有定时任务")
+    public String getAllJob(){
+        return ruleSchedule.printAllJob();
     }
+
+    /**
+     * 删除所有定时任务
+     * @return
+     */
+    @RequestMapping(value = "/removeAllJob", method = RequestMethod.GET)
+    @ApiOperation(value="removeAllJob", notes="删除所有定时任务")
+    public String removeAllJob(){
+        return ruleSchedule.removeAllJob();
+    }
+
+    /**
+     * 删除对应用户所有定时任务
+     * @return
+     */
+    @RequestMapping(value = "/removeJobByOpenId", method = RequestMethod.GET)
+    @ApiOperation(value="removeJobByOpenId", notes="删除对应用户所有定时任务")
+    public String removeJobByOpenId(@RequestParam String OpenId){
+        return ruleSchedule.removeJobByOpenId(OpenId);
+    }
+
+    /**
+     * 删除单个定时任务
+     * @return
+     */
+    @RequestMapping(value = "/removeJob", method = RequestMethod.GET)
+    @ApiOperation(value="removeJob", notes="删除单个定时任务")
+    public String removeJob(@RequestParam String id,
+                                    @RequestParam String op,
+                                    @RequestParam String dateStr,
+                                    @RequestParam String OpenId){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = null;
+        try {
+           date = sdf.parse(dateStr);
+        } catch (ParseException e) {
+            return JsonResponseUtil.badResult( BadResultCode.Date_Error.getCode(), BadResultCode.Date_Error.getRemark());
+        }
+        return ruleSchedule.removeJob(id , op, date, OpenId);
+    }
+
 }

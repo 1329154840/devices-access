@@ -6,15 +6,12 @@ import com.bupt.devicesaccess.model.RuleJobsVO;
 import com.bupt.devicesaccess.utils.BadResultCode;
 import com.bupt.devicesaccess.utils.JsonResponseUtil;
 import com.bupt.devicesaccess.utils.RequestUtils;
-import jdk.nashorn.internal.ir.RuntimeNode;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -37,11 +34,10 @@ public class RuleSchedule{
     Scheduler scheduler;
     /**
      * 规则上传
-     * @param uid
      * @param rule
      * @return
      */
-    public String adapter(String uid, JSONObject rule){
+    public String adapter(JSONObject rule){
         JSONArray data = rule.getJSONArray("data");
         String type = rule.getString("type");
         for(int i=0; i<data.size(); i++){
@@ -49,7 +45,7 @@ public class RuleSchedule{
             String id = singleRule.getString("id");
             String op = singleRule.getString("op");
             Date date = singleRule.getDate("date");
-            if ( !addJob( id, op, uid, date )){
+            if ( !addJob( id, op, date )){
                 return JsonResponseUtil.badResult( BadResultCode.Rule_Upload_Error.getCode(), BadResultCode.Rule_Upload_Error.getRemark() + String.format(",第%d可能重复", i+1));
             }
         }
@@ -60,15 +56,15 @@ public class RuleSchedule{
      * 给单个传感器添加一个任务
      * @param id
      * @param operate
-     * @param uid
      * @param date
      * @Return boolean
      */
-    private boolean addJob(String id,String operate, String uid, Date date ){
+    private boolean addJob(String id,String operate, Date date ){
         String jobName = id + "/" + operate + "/" + date.toString();
+        String openId = String.valueOf( RequestUtils.getOpenId() );
         JobDetail jobDetail = JobBuilder.newJob(RuleJob.class)
-                .withIdentity(jobName , uid).build();
-        Trigger trigger = TriggerBuilder.newTrigger().withIdentity( jobName, uid)
+                .withIdentity(jobName , openId).build();
+        Trigger trigger = TriggerBuilder.newTrigger().withIdentity( jobName, openId)
                 .startAt(date)
                 .build();
         try {
@@ -124,15 +120,20 @@ public class RuleSchedule{
         return JsonResponseUtil.ok(ruleJobsVOList);
     }
 
+    /**
+     * 输出个人定时任务
+     * @return
+     */
     public String printJobByOpenId(){
         List<RuleJobsVO> ruleJobsVOList = new ArrayList<>();
+        String openId = String.valueOf( RequestUtils.getOpenId() );
         try {
             List<String> triggerGroupNames = scheduler.getTriggerGroupNames();
             for(String groupName: triggerGroupNames){
                 /**
                  *组装group的匹配，为了模糊获取所有的triggerKey或者jobKey
                  */
-                if(groupName.equals(RequestUtils.getOpenId())){
+                if(groupName.equals( openId )){
                     GroupMatcher groupMatcher = GroupMatcher.groupEquals(groupName);
                     //获取所有的triggerKey
                     Set<TriggerKey> triggerKeySet = scheduler.getTriggerKeys(groupMatcher);
@@ -165,10 +166,85 @@ public class RuleSchedule{
         return JsonResponseUtil.ok(ruleJobsVOList);
     }
 
+    /**
+     * 删除单个定时任务
+     * @param id
+     * @param operate
+     * @param date
+     */
+    public String removeJob(String id,String operate, Date date, String openId) {
+        String name = id + "/" + operate + "/" + date.toString();
+        try {
+            TriggerKey triggerKey = TriggerKey.triggerKey(name,openId);
+            // 停止触发器
+            scheduler.pauseTrigger(triggerKey);
+            // 移除触发器
+            scheduler.unscheduleJob(triggerKey);
+            // 删除任务
+            scheduler.deleteJob(JobKey.jobKey(name,openId));
+        } catch (Exception e) {
+            log.error("removeJob {}", e.getMessage());
+            return JsonResponseUtil.badResult(BadResultCode.System_Error.getCode(), BadResultCode.System_Error.getRemark());
+        }
+        return JsonResponseUtil.ok();
+    }
 
+    /**
+     * 删除用户所有定时任务
+     * @return
+     */
+    public String removeJobByOpenId(String openId) {
+        try {
+            List<String> triggerGroupNames = scheduler.getTriggerGroupNames();
+            for(String groupName: triggerGroupNames){
+                /**
+                 *组装group的匹配，为了模糊获取所有的triggerKey或者jobKey
+                 */
+                if(groupName.equals( openId )){
+                    GroupMatcher groupMatcher = GroupMatcher.groupEquals(groupName);
+                    //获取所有的triggerKey
+                    Set<TriggerKey> triggerKeySet = scheduler.getTriggerKeys(groupMatcher);
+                    for (TriggerKey triggerKey : triggerKeySet) {
+                        // 停止触发器
+                        scheduler.pauseTrigger( triggerKey);
+                        // 移除触发器
+                        scheduler.unscheduleJob( triggerKey);
+                        // 删除任务
+                        scheduler.deleteJob( JobKey.jobKey( triggerKey.getName(), triggerKey.getGroup()));
+                    }
+                }
+            }
+        }catch (Exception e){
+            log.error("removeJobByOpenId {}", e.getMessage());
+            return JsonResponseUtil.badResult(BadResultCode.System_Error.getCode(), BadResultCode.System_Error.getRemark());
+        }
+        return JsonResponseUtil.ok();
+    }
 
-
-
-
-
+    /**
+     * 删除所有定时任务
+     * @return
+     */
+    public String removeAllJob(){
+        try {
+            List<String> triggerGroupNames = scheduler.getTriggerGroupNames();
+            for(String groupName: triggerGroupNames){
+                GroupMatcher groupMatcher = GroupMatcher.groupEquals(groupName);
+                //获取所有的triggerKey
+                Set<TriggerKey> triggerKeySet = scheduler.getTriggerKeys(groupMatcher);
+                for (TriggerKey triggerKey : triggerKeySet) {
+                    // 停止触发器
+                    scheduler.pauseTrigger( triggerKey);
+                    // 移除触发器
+                    scheduler.unscheduleJob( triggerKey);
+                    // 删除任务
+                    scheduler.deleteJob( JobKey.jobKey( triggerKey.getName(), triggerKey.getGroup()));
+                }
+            }
+        }catch (Exception e){
+            log.error("removeAllJob {}", e.getMessage());
+            return JsonResponseUtil.badResult(BadResultCode.System_Error.getCode(), BadResultCode.System_Error.getRemark());
+        }
+        return JsonResponseUtil.ok();
+    }
 }

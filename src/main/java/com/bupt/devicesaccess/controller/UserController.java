@@ -15,6 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 
 
@@ -181,7 +185,7 @@ public class UserController {
         String result;
         try {
             JSONObject jsonRule =JSONObject.parseObject(rule);
-            result =ruleSchedule.adapter("123", jsonRule);
+            result =ruleSchedule.adapter(jsonRule);
         } catch (JSONException e){
             log.error("json 解析有误");
             return JsonResponseUtil.badResult( BadResultCode.Rule_Json_Error.getCode(), BadResultCode.Rule_Json_Error.getRemark());
@@ -199,4 +203,34 @@ public class UserController {
         return ruleSchedule.printJobByOpenId();
     }
 
+    /**
+     * 删除该用户所有定时任务
+     * @return
+     */
+    @RequestMapping(value = "/removeJobByOpenId", method = RequestMethod.GET)
+    @ApiOperation(value="removeJobByOpenId", notes="获取个人定时任务")
+    public String removeJobByOpenId(){
+        String openId = String.valueOf( RequestUtils.getOpenId() );
+        return ruleSchedule.removeJobByOpenId(openId);
+    }
+
+    /**
+     * 删除单个定时任务
+     * @return
+     */
+    @RequestMapping(value = "/removeJob", method = RequestMethod.GET)
+    @ApiOperation(value="removeJob", notes="删除单个定时任务")
+    public String removeJob(@RequestParam String id,
+                                    @RequestParam String op,
+                                    @RequestParam String dateStr){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String openId = String.valueOf(RequestUtils.getOpenId());
+        Date date = null;
+        try {
+            date = sdf.parse(dateStr);
+        } catch (ParseException e) {
+            return JsonResponseUtil.badResult( BadResultCode.Date_Error.getCode(), BadResultCode.Date_Error.getRemark());
+        }
+        return ruleSchedule.removeJob(id , op, date, openId);
+    }
 }
