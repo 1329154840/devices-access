@@ -11,6 +11,7 @@ import org.quartz.*;
 import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -30,6 +31,7 @@ import java.util.*;
 @Slf4j
 @Component
 public class RuleSchedule{
+    @Qualifier("mySchedule")
     @Autowired
     Scheduler scheduler;
     /**
@@ -62,6 +64,7 @@ public class RuleSchedule{
     private boolean addJob(String id,String operate, Date date ){
         String jobName = id + "/" + operate + "/" + date.toString();
         String openId = String.valueOf( RequestUtils.getOpenId() );
+        log.info("{}", openId);
         JobDetail jobDetail = JobBuilder.newJob(RuleJob.class)
                 .withIdentity(jobName , openId).build();
         Trigger trigger = TriggerBuilder.newTrigger().withIdentity( jobName, openId)
@@ -175,18 +178,33 @@ public class RuleSchedule{
     public String removeJob(String id,String operate, Date date, String openId) {
         String name = id + "/" + operate + "/" + date.toString();
         try {
-            TriggerKey triggerKey = TriggerKey.triggerKey(name,openId);
-            // 停止触发器
-            scheduler.pauseTrigger(triggerKey);
-            // 移除触发器
-            scheduler.unscheduleJob(triggerKey);
-            // 删除任务
-            scheduler.deleteJob(JobKey.jobKey(name,openId));
+            List<String> triggerGroupNames = scheduler.getTriggerGroupNames();
+            for(String groupName: triggerGroupNames) {
+                /**
+                 *组装group的匹配，为了模糊获取所有的triggerKey或者jobKey
+                 */
+                if (groupName.equals(openId)) {
+                    GroupMatcher groupMatcher = GroupMatcher.groupEquals(groupName);
+                    //获取所有的triggerKey
+                    Set<TriggerKey> triggerKeySet = scheduler.getTriggerKeys(groupMatcher);
+                    for (TriggerKey triggerKey : triggerKeySet) {
+                        if( name.equals(triggerKey.getName()) && openId.equals(triggerKey.getGroup())){
+                            // 停止触发器
+                            scheduler.pauseTrigger(triggerKey);
+                            // 移除触发器
+                            scheduler.unscheduleJob(triggerKey);
+                            // 删除任务
+                            scheduler.deleteJob(JobKey.jobKey(name,openId));
+                            return JsonResponseUtil.ok(name);
+                        }
+                    }
+                }
+            }
         } catch (Exception e) {
             log.error("removeJob {}", e.getMessage());
             return JsonResponseUtil.badResult(BadResultCode.System_Error.getCode(), BadResultCode.System_Error.getRemark());
         }
-        return JsonResponseUtil.ok();
+        return JsonResponseUtil.badResult( BadResultCode.Job_Is_Null.getCode(), BadResultCode.Job_Is_Null.getRemark());
     }
 
     /**

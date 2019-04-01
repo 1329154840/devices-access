@@ -25,7 +25,7 @@ public class ScheduleConfig {
      * @throws SchedulerException
      * @throws InterruptedException
      */
-    @Bean
+    @Bean("mySchedule")
     public Scheduler createScheduler ()throws SchedulerException, InterruptedException{
         SchedulerFactory schedulerFactory = new StdSchedulerFactory();
         Scheduler scheduler = schedulerFactory.getScheduler();

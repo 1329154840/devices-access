@@ -29,7 +29,9 @@ public enum BadResultCode {
 
     Rule_Json_Error(7, "json解析错误"),
 
-    Date_Error(8, "date解析错误");
+    Date_Error(8, "date解析错误"),
+
+    Job_Is_Null(9 , "定时任务不存在");
 
 
     BadResultCode(Integer code, String remark) {

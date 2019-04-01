@@ -50,6 +50,7 @@ public class ReceiverCallback implements MqttCallback {
     public void messageArrived(String topic, MqttMessage message) throws Exception {
         String mes = new String(message.getPayload());
         if (HEARTTOPIC.equals(topic)){
+            log.info("hotUpdate {}" , mes);
             hotUpdate(mes);
         }
     }

@@ -1,5 +1,6 @@
 package com.bupt.devicesaccess.utils;
 
+import com.netflix.ribbon.proxy.annotation.Http;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -30,7 +31,9 @@ public class RequestUtils {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals("token")) {
+                    System.out.println(cookie.getValue());
                     String[] buffer = cookie.getValue().split("-");
+
                     return Integer.valueOf(buffer[0]);
                 }
             }

@@ -7,6 +7,8 @@ import com.bupt.devicesaccess.schedule.RuleSchedule;
 import com.bupt.devicesaccess.utils.BadResultCode;
 import com.bupt.devicesaccess.utils.JsonResponseUtil;
 import com.bupt.devicesaccess.utils.RequestUtils;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.exception.HystrixTimeoutException;
 import com.sun.xml.internal.ws.spi.db.DatabindingException;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +52,8 @@ public class AdminController {
      * @return
      */
 //    @Token("admin")
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="findAll",groupKey="adminGroup",
+            threadPoolKey="findAllThread")
     @RequestMapping(value = "/findAll", method = RequestMethod.GET)
     @ApiOperation(value="findAll", notes="查询所有device")
     public String findAll(){
@@ -65,6 +69,8 @@ public class AdminController {
      * @return
      */
 //    @Token("admin")
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="insert",groupKey="adminGroup",
+            threadPoolKey="insertThread")
     @RequestMapping(value = "/insert", method = RequestMethod.GET)
     @ApiOperation(value="insert", notes="新建设备")
     public String insert(@RequestParam(value = "name") String name,
@@ -98,6 +104,8 @@ public class AdminController {
      * @return
      */
 //    @Token("admin")
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="updateById",groupKey="adminGroup",
+            threadPoolKey="updateByIdThread")
     @RequestMapping(value = "/updateById", method = RequestMethod.GET)
     @ApiOperation(value="updateById", notes="按条件跟新设备，除了id，其他选填")
     public String updateById(@RequestParam("id") String id,
@@ -133,6 +141,8 @@ public class AdminController {
      * @return
      */
 //    @Token("admin")
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="deleteById",groupKey="adminGroup",
+            threadPoolKey="deleteByIdThread")
     @RequestMapping(value = "/deleteById", method = RequestMethod.GET)
     @ApiOperation(value="deleteById", notes="通过id删除设备")
     public String deleteById(@RequestParam("id") String id){
@@ -149,6 +159,8 @@ public class AdminController {
      * 一键删除所有设备
      * @return
      */
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="deleteAll",groupKey="adminGroup",
+            threadPoolKey="deleteAllThread")
     @RequestMapping(value = "/deleteAll", method = RequestMethod.GET)
     @ApiOperation(value="deleteAll", notes="删除所有设备")
     public String deleteAll(){
@@ -161,6 +173,8 @@ public class AdminController {
      * 获取所有定时任务
      * @return
      */
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="getAllJob",groupKey="adminGroup",
+            threadPoolKey="getAllJobThread")
     @RequestMapping(value = "/getAllJob", method = RequestMethod.GET)
     @ApiOperation(value="getAllJob", notes="获取所有定时任务")
     public String getAllJob(){
@@ -171,6 +185,8 @@ public class AdminController {
      * 删除所有定时任务
      * @return
      */
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="removeAllJob",groupKey="adminGroup",
+            threadPoolKey="removeAllJobThread")
     @RequestMapping(value = "/removeAllJob", method = RequestMethod.GET)
     @ApiOperation(value="removeAllJob", notes="删除所有定时任务")
     public String removeAllJob(){
@@ -181,22 +197,26 @@ public class AdminController {
      * 删除对应用户所有定时任务
      * @return
      */
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="removeJobByOpenId",groupKey="adminGroup",
+            threadPoolKey="removeJobByOpenIdThread")
     @RequestMapping(value = "/removeJobByOpenId", method = RequestMethod.GET)
     @ApiOperation(value="removeJobByOpenId", notes="删除对应用户所有定时任务")
-    public String removeJobByOpenId(@RequestParam String OpenId){
-        return ruleSchedule.removeJobByOpenId(OpenId);
+    public String removeJobByOpenId(@RequestParam String openId){
+        return ruleSchedule.removeJobByOpenId(openId);
     }
 
     /**
      * 删除单个定时任务
      * @return
      */
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="removeJob",groupKey="adminGroup",
+            threadPoolKey="removeJobThread")
     @RequestMapping(value = "/removeJob", method = RequestMethod.GET)
     @ApiOperation(value="removeJob", notes="删除单个定时任务")
     public String removeJob(@RequestParam String id,
                                     @RequestParam String op,
                                     @RequestParam String dateStr,
-                                    @RequestParam String OpenId){
+                                    @RequestParam String openId){
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = null;
         try {
@@ -204,7 +224,16 @@ public class AdminController {
         } catch (ParseException e) {
             return JsonResponseUtil.badResult( BadResultCode.Date_Error.getCode(), BadResultCode.Date_Error.getRemark());
         }
-        return ruleSchedule.removeJob(id , op, date, OpenId);
+        return ruleSchedule.removeJob(id , op, date, openId);
     }
 
+    private String getFallback(Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
 }

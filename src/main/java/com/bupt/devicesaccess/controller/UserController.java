@@ -8,18 +8,23 @@ import com.bupt.devicesaccess.schedule.RuleSchedule;
 import com.bupt.devicesaccess.utils.BadResultCode;
 import com.bupt.devicesaccess.utils.JsonResponseUtil;
 import com.bupt.devicesaccess.utils.RequestUtils;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.exception.HystrixTimeoutException;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -44,14 +49,17 @@ public class UserController {
     @Autowired
     private RuleSchedule ruleSchedule;
 
+
     /**
      * 查询未绑定的所有空设备
      * @return
      */
 //    @Token
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="findFreeAll",groupKey="UserGroup",
+            threadPoolKey="findFreeAllThread")
     @RequestMapping(value = "/findFreeAll", method = RequestMethod.GET)
     @ApiOperation(value="findFreeAll", notes="查询自己拥有的所有device")
-    public String findFreeAll(){
+    public String findFreeAll() throws Exception{
         Integer uid = RequestUtils.getOpenId();
         return JsonResponseUtil.ok(deviceRepository.findFreeAll(uid));
     }
@@ -60,6 +68,8 @@ public class UserController {
      * @return
      */
 //    @Token
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="findAll",groupKey="UserGroup",
+            threadPoolKey="findAllThread")
     @RequestMapping(value = "/findAll", method = RequestMethod.GET)
     @ApiOperation(value="findAll", notes="查询自己拥有的所有device")
     public String findAll(){
@@ -71,6 +81,8 @@ public class UserController {
      * @return
      */
 //    @Token
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="findGroupId",groupKey="UserGroup",
+            threadPoolKey="findGroupIdThread")
     @RequestMapping(value = "/findGroupId", method = RequestMethod.GET)
     @ApiOperation(value="findGroupId", notes="查询自己拥有的组号")
     public String findGroupId(){
@@ -82,6 +94,8 @@ public class UserController {
      * @return
      */
 //    @Token
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="findByGroupId",groupKey="UserGroup",
+            threadPoolKey="findByGroupIdThread")
     @RequestMapping(value = "/findByGroupId", method = RequestMethod.GET)
     @ApiOperation(value="findByGroupId", notes="查询自己拥有对应组的device")
     public String findByGroupId(@RequestParam(value = "groupId") String groupId){
@@ -92,6 +106,8 @@ public class UserController {
      * 查询单个device
      */
 //    @Token
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="findById",groupKey="UserGroup",
+            threadPoolKey="findByIdThread")
     @RequestMapping(value = "/findById", method = RequestMethod.GET)
     @ApiOperation(value="findById", notes="查询单个device")
     public String findById(@RequestParam(value = "id") String id){
@@ -102,6 +118,8 @@ public class UserController {
      * @return 返回device
      */
 //    @Token
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="insert",groupKey="UserGroup",
+            threadPoolKey="insertThread")
     @RequestMapping(value = "/insert", method = {RequestMethod.GET,RequestMethod.POST})
     @ApiOperation(value="insert", notes="将新建空设备，拉入自己组下")
     public String insert(@RequestParam(value = "id") String id,
@@ -128,6 +146,8 @@ public class UserController {
      * @return 返回更新完 device
      */
 //    @Token
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="update",groupKey="UserGroup",
+            threadPoolKey="updateThread")
     @RequestMapping(value = "/update", method = {RequestMethod.GET,RequestMethod.POST})
     @ApiOperation(value="update", notes="按条件更新单个device，传只需要更新的字段，其他字段为null不传")
     public String update(@RequestParam(value = "id") String id,
@@ -156,6 +176,8 @@ public class UserController {
      * @return
      */
 //    @Token
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="deleteById",groupKey="UserGroup",
+            threadPoolKey="deleteByIdThread")
     @RequestMapping(value = "/deleteById", method = {RequestMethod.GET,RequestMethod.POST})
     @ApiOperation(value="deleteById", notes="解绑该设备")
     public String deleteById(@RequestParam(value = "id") String id){
@@ -179,7 +201,9 @@ public class UserController {
      * @param rule
      * @return
      */
-    @RequestMapping(value = "/upload",method = RequestMethod.GET)
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="upload",groupKey="UserGroup",
+            threadPoolKey="uploadThread")
+    @RequestMapping(value = "/upload",method = { RequestMethod.GET, RequestMethod.POST})
     @ApiOperation(value="upload", notes="上传规则")
     public String upload(@RequestParam String rule){
         String result;
@@ -197,6 +221,8 @@ public class UserController {
      * 获取个人定时任务
      * @return
      */
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="getJob",groupKey="UserGroup",
+            threadPoolKey="getJobThread")
     @RequestMapping(value = "/getJob", method = RequestMethod.GET)
     @ApiOperation(value="getJob", notes="获取个人定时任务")
     public String getJob(){
@@ -207,8 +233,10 @@ public class UserController {
      * 删除该用户所有定时任务
      * @return
      */
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="removeJobByOpenId",groupKey="UserGroup",
+            threadPoolKey="removeJobByOpenIdThread")
     @RequestMapping(value = "/removeJobByOpenId", method = RequestMethod.GET)
-    @ApiOperation(value="removeJobByOpenId", notes="获取个人定时任务")
+    @ApiOperation(value="removeJobByOpenId", notes="删除该用户所有定时任务")
     public String removeJobByOpenId(){
         String openId = String.valueOf( RequestUtils.getOpenId() );
         return ruleSchedule.removeJobByOpenId(openId);
@@ -218,6 +246,8 @@ public class UserController {
      * 删除单个定时任务
      * @return
      */
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="removeJob",groupKey="UserGroup",
+            threadPoolKey="removeJobThread")
     @RequestMapping(value = "/removeJob", method = RequestMethod.GET)
     @ApiOperation(value="removeJob", notes="删除单个定时任务")
     public String removeJob(@RequestParam String id,
@@ -232,5 +262,16 @@ public class UserController {
             return JsonResponseUtil.badResult( BadResultCode.Date_Error.getCode(), BadResultCode.Date_Error.getRemark());
         }
         return ruleSchedule.removeJob(id , op, date, openId);
+    }
+
+
+    private String getFallback(Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
     }
 }
