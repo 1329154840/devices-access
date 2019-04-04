@@ -236,4 +236,20 @@ public class AdminController {
         log.error("Throwable info {}",e.getMessage());
         return "fail";
     }
+
+    private String getFallback(String name,
+                               String model,
+                               String nickname,
+                               String groupId,
+                               String status,
+                               Integer num,
+                               Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
 }
