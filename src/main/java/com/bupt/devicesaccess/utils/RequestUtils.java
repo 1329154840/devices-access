@@ -24,7 +24,7 @@ public class RequestUtils {
      * 通过cookie拿token中的OpenId
      * @return
      */
-    public static Integer getOpenId() {
+    public static Long getOpenId() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
                 .getRequestAttributes()).getRequest();
         Cookie[] cookies = request.getCookies();
@@ -34,10 +34,10 @@ public class RequestUtils {
                     System.out.println(cookie.getValue());
                     String[] buffer = cookie.getValue().split("-");
 
-                    return Integer.valueOf(buffer[0]);
+                    return Long.valueOf(buffer[0]);
                 }
             }
         }
-        return 0;
+        return new Long(0);
     }
 }

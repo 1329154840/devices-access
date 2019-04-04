@@ -211,7 +211,8 @@ public class RuleSchedule{
      * 删除用户所有定时任务
      * @return
      */
-    public String removeJobByOpenId(String openId) {
+    public String removeJobByOpenId(Long openIdLong) {
+        String openId = String.valueOf(openIdLong);
         try {
             List<String> triggerGroupNames = scheduler.getTriggerGroupNames();
             for(String groupName: triggerGroupNames){

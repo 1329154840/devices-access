@@ -201,7 +201,7 @@ public class AdminController {
             threadPoolKey="removeJobByOpenIdThread")
     @RequestMapping(value = "/removeJobByOpenId", method = RequestMethod.GET)
     @ApiOperation(value="removeJobByOpenId", notes="删除对应用户所有定时任务")
-    public String removeJobByOpenId(@RequestParam String openId){
+    public String removeJobByOpenId(@RequestParam Long openId){
         return ruleSchedule.removeJobByOpenId(openId);
     }
 

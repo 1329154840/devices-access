@@ -25,7 +25,7 @@ public class Device {
     @PrimaryKey
     private String id;
     @Column("customer_id")
-    private Integer customId;
+    private Long customId;
     @Column("group_id")
     private String groupId;
     private String model;
@@ -36,7 +36,7 @@ public class Device {
     public Device(String model, String name) {
         this.id = UUID.randomUUID().toString();
         this.groupId = "-1";
-        this.customId = -1;
+        this.customId = new Long(-1);
         this.nickname = "";
         this.model = model;
         this.name = name;

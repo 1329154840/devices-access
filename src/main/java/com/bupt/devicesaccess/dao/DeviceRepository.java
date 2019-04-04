@@ -23,16 +23,16 @@ public interface DeviceRepository extends CrudRepository<Device,String> {
     String SELECT = "SELECT id,customer_id,group_id,model,name,nickname,status FROM device ";
 
     @Query(SELECT + "WHERE customer_id = :custom_id ALLOW FILTERING")
-    List<Device> findFreeAll(@Param("custom_id") Integer customId);
+    List<Device> findFreeAll(@Param("custom_id") Long customId);
 
     @Query(SELECT + "WHERE customer_id = :custom_id ALLOW FILTERING")
-    List<Device> findByCustomId(@Param("custom_id") Integer customId);
+    List<Device> findByCustomId(@Param("custom_id") Long customId);
 
     @Query(SELECT + "WHERE customer_id = :custom_id And group_id = :group_id ALLOW FILTERING")
-    List<Device> findByCustomIdAndGroupId(@Param("custom_id") Integer customId, @Param("group_id") String groupId);
+    List<Device> findByCustomIdAndGroupId(@Param("custom_id") Long customId, @Param("group_id") String groupId);
 
     @Query("SELECT DISTINCT group_id FROM device WHERE customer_id = :custom_id ALLOW FILTERING")
-    List<String> findGroupId(@Param("custom_id") Integer customId);
+    List<String> findGroupId(@Param("custom_id") Long customId);
 
     @Query("UPDATE device SET status = :status WHERE id = :id ")
     void updateById(@Param("id") String id, @Param("status") String status);
