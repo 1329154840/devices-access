@@ -24,8 +24,8 @@ import java.util.UUID;
 public class Device {
     @PrimaryKey
     private String id;
-    @Column("customer_id")
-    private Integer customId;
+    @Column("open_id")
+    private String openId;
     @Column("group_id")
     private String groupId;
     private String model;
@@ -36,7 +36,7 @@ public class Device {
     public Device(String model, String name) {
         this.id = UUID.randomUUID().toString();
         this.groupId = "-1";
-        this.customId = -1;
+        this.openId = "-1";
         this.nickname = "";
         this.model = model;
         this.name = name;

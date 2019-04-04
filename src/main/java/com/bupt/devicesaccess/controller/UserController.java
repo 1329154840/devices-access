@@ -60,8 +60,7 @@ public class UserController {
     @RequestMapping(value = "/findFreeAll", method = RequestMethod.GET)
     @ApiOperation(value="findFreeAll", notes="查询自己拥有的所有device")
     public String findFreeAll() throws Exception{
-        Integer uid = RequestUtils.getOpenId();
-        return JsonResponseUtil.ok(deviceRepository.findFreeAll(uid));
+        return JsonResponseUtil.ok(deviceRepository.findFreeAll( RequestUtils.getOpenId()));
     }
     /**
      * 查询自己拥有的所有设备
@@ -73,8 +72,7 @@ public class UserController {
     @RequestMapping(value = "/findAll", method = RequestMethod.GET)
     @ApiOperation(value="findAll", notes="查询自己拥有的所有device")
     public String findAll(){
-        Integer uid = RequestUtils.getOpenId();
-        return JsonResponseUtil.ok(deviceRepository.findByCustomId(uid));
+        return JsonResponseUtil.ok(deviceRepository.findByOpenId( RequestUtils.getOpenId()));
     }
     /**
      * 查询自己拥有的组号
@@ -86,8 +84,7 @@ public class UserController {
     @RequestMapping(value = "/findGroupId", method = RequestMethod.GET)
     @ApiOperation(value="findGroupId", notes="查询自己拥有的组号")
     public String findGroupId(){
-        Integer openId = RequestUtils.getOpenId();
-        return JsonResponseUtil.ok(deviceRepository.findGroupId(openId));
+        return JsonResponseUtil.ok(deviceRepository.findGroupId( RequestUtils.getOpenId()));
     }
     /**
      * 查询自己拥有对应组的device
@@ -99,8 +96,7 @@ public class UserController {
     @RequestMapping(value = "/findByGroupId", method = RequestMethod.GET)
     @ApiOperation(value="findByGroupId", notes="查询自己拥有对应组的device")
     public String findByGroupId(@RequestParam(value = "groupId") String groupId){
-        Integer uid = RequestUtils.getOpenId();
-        return JsonResponseUtil.ok(deviceRepository.findByCustomIdAndGroupId(uid, groupId));
+        return JsonResponseUtil.ok(deviceRepository.findByOpenIdAndGroupId( RequestUtils.getOpenId(), groupId));
     }
     /**
      * 查询单个device
@@ -124,17 +120,17 @@ public class UserController {
     @ApiOperation(value="insert", notes="将新建空设备，拉入自己组下")
     public String insert(@RequestParam(value = "id") String id,
                          @RequestParam(value = "group_id") String groupId){
-        Integer uid = RequestUtils.getOpenId();
+        String openId = RequestUtils.getOpenId();
         Optional<Device> optionalDevice =deviceRepository.findById(id);
         if(!optionalDevice.isPresent()){
             return JsonResponseUtil.badResult(BadResultCode.Device_Is_Null.getCode(),BadResultCode.Device_Is_Null.getRemark());
         }
         Device device = optionalDevice.get();
-        device.setCustomId(uid);
+        device.setOpenId(openId);
         device.setGroupId(groupId);
         device.setStatus("关机");
         Device newDevice = deviceRepository.save(device);
-        log.info("uid:{} insertDevice {}",uid,newDevice);
+        log.info("uid:{} insertDevice {}",openId,newDevice);
         return JsonResponseUtil.ok(newDevice);
     }
     /**
@@ -181,18 +177,18 @@ public class UserController {
     @RequestMapping(value = "/deleteById", method = {RequestMethod.GET,RequestMethod.POST})
     @ApiOperation(value="deleteById", notes="解绑该设备")
     public String deleteById(@RequestParam(value = "id") String id){
-        Integer uid = RequestUtils.getOpenId();
+        String openId = RequestUtils.getOpenId();
         Optional<Device> optionalDevice =deviceRepository.findById(id);
         if(!optionalDevice.isPresent()){
             return JsonResponseUtil.badResult(BadResultCode.Device_Is_Null.getCode(),BadResultCode.Device_Is_Null.getRemark());
         }
         Device device = optionalDevice.get();
         device.setStatus("关机");
-        device.setCustomId(-1);
+        device.setOpenId("-1");
         device.setGroupId("-1");
         device.setNickname("");
         Device newDevice = deviceRepository.save(device);
-        log.info("uid:{} deleteDevice:{}",uid,id);
+        log.info("uid:{} deleteDevice:{}", openId, id);
         return JsonResponseUtil.ok(newDevice);
     }
 
@@ -238,8 +234,7 @@ public class UserController {
     @RequestMapping(value = "/removeJobByOpenId", method = RequestMethod.GET)
     @ApiOperation(value="removeJobByOpenId", notes="删除该用户所有定时任务")
     public String removeJobByOpenId(){
-        String openId = String.valueOf( RequestUtils.getOpenId() );
-        return ruleSchedule.removeJobByOpenId(openId);
+        return ruleSchedule.removeJobByOpenId(RequestUtils.getOpenId());
     }
 
     /**
@@ -254,7 +249,7 @@ public class UserController {
                                     @RequestParam String op,
                                     @RequestParam String dateStr){
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String openId = String.valueOf(RequestUtils.getOpenId());
+        String openId = RequestUtils.getOpenId();
         Date date = null;
         try {
             date = sdf.parse(dateStr);

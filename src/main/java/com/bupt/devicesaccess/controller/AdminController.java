@@ -59,6 +59,19 @@ public class AdminController {
     public String findAll(){
         return JsonResponseUtil.ok(deviceRepository.findAll());
     }
+
+    /**
+     * 查找用户所有设备
+     * @param openId
+     * @return
+     */
+    @HystrixCommand(fallbackMethod="getFallback",commandKey="findByOpenId",groupKey="adminGroup",
+            threadPoolKey="findByOpenIdThread")
+    @RequestMapping(value = "/findByOpenId", method = RequestMethod.GET)
+    @ApiOperation(value="findByOpenId", notes="通过openId查询所有device")
+    public String findByCustomId(@RequestParam String openId){
+        return JsonResponseUtil.ok( deviceRepository.findByOpenId( openId));
+    }
     /**
      * 新建设备
      * @param name 必填
