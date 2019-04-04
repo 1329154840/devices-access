@@ -63,7 +63,7 @@ public class RuleSchedule{
      */
     private boolean addJob(String id,String operate, Date date ){
         String jobName = id + "/" + operate + "/" + date.toString();
-        String openId = String.valueOf( RequestUtils.getOpenId() );
+        String openId = RequestUtils.getOpenId();
         log.info("{}", openId);
         JobDetail jobDetail = JobBuilder.newJob(RuleJob.class)
                 .withIdentity(jobName , openId).build();
@@ -129,7 +129,7 @@ public class RuleSchedule{
      */
     public String printJobByOpenId(){
         List<RuleJobsVO> ruleJobsVOList = new ArrayList<>();
-        String openId = String.valueOf( RequestUtils.getOpenId() );
+        String openId = RequestUtils.getOpenId();
         try {
             List<String> triggerGroupNames = scheduler.getTriggerGroupNames();
             for(String groupName: triggerGroupNames){
@@ -211,8 +211,7 @@ public class RuleSchedule{
      * 删除用户所有定时任务
      * @return
      */
-    public String removeJobByOpenId(Long openIdLong) {
-        String openId = String.valueOf(openIdLong);
+    public String removeJobByOpenId(String openId) {
         try {
             List<String> triggerGroupNames = scheduler.getTriggerGroupNames();
             for(String groupName: triggerGroupNames){

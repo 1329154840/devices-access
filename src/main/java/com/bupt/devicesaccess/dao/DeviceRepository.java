@@ -20,19 +20,19 @@ import java.util.List;
  * @since 1.0-SNAPSHOT
  */
 public interface DeviceRepository extends CrudRepository<Device,String> {
-    String SELECT = "SELECT id,customer_id,group_id,model,name,nickname,status FROM device ";
+    String SELECT = "SELECT id,open_id,group_id,model,name,nickname,status FROM device ";
 
-    @Query(SELECT + "WHERE customer_id = :custom_id ALLOW FILTERING")
-    List<Device> findFreeAll(@Param("custom_id") Long customId);
+    @Query(SELECT + "WHERE open_id = :open_id ALLOW FILTERING")
+    List<Device> findFreeAll(@Param("open_id") String openId);
 
-    @Query(SELECT + "WHERE customer_id = :custom_id ALLOW FILTERING")
-    List<Device> findByCustomId(@Param("custom_id") Long customId);
+    @Query(SELECT + "WHERE open_id = :open_id ALLOW FILTERING")
+    List<Device> findByOpenId(@Param("open_id") String openId);
 
-    @Query(SELECT + "WHERE customer_id = :custom_id And group_id = :group_id ALLOW FILTERING")
-    List<Device> findByCustomIdAndGroupId(@Param("custom_id") Long customId, @Param("group_id") String groupId);
+    @Query(SELECT + "WHERE open_id = :open_id And group_id = :group_id ALLOW FILTERING")
+    List<Device> findByOpenIdAndGroupId(@Param("open_id") String openId, @Param("group_id") String groupId);
 
-    @Query("SELECT DISTINCT group_id FROM device WHERE customer_id = :custom_id ALLOW FILTERING")
-    List<String> findGroupId(@Param("custom_id") Long customId);
+    @Query("SELECT DISTINCT group_id FROM device WHERE open_id = :open_id ALLOW FILTERING")
+    List<String> findGroupId(@Param("open_id") String openId);
 
     @Query("UPDATE device SET status = :status WHERE id = :id ")
     void updateById(@Param("id") String id, @Param("status") String status);
