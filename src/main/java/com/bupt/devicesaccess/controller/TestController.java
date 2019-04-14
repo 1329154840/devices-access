@@ -39,13 +39,15 @@ public class TestController {
     @Autowired
     private MqttPushClient mqttPushClient;
 
-    @Autowired
-    private RuleSchedule ruleSchedule;
 
-
+    /**
+     * 主页测试接口
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(value = "/",method = RequestMethod.GET)
     @ApiOperation(value="mainUrl", notes="这只是一个测试controller调用的接口，没有任何的业务逻辑")
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="mainUrl",groupKey="UserGroup",
+    @HystrixCommand(fallbackMethod="mainUrlGetFallback",commandKey="mainUrl",groupKey="UserGroup",
             threadPoolKey="mainUrlThread")
     public String mainUrl() throws Exception{
 //        int i= 1/0;
@@ -53,15 +55,48 @@ public class TestController {
         return JsonResponseUtil.ok("欢迎使用 devices-access，请访问swagger-ui.html获取接口信息");
     }
 
+    /**
+     * 测试mqtt发送
+     * @param messange
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(value = "/mqtt/publish",method = RequestMethod.GET)
     @ApiOperation(value="mqttPublish", notes="mqtt发送Publish,默认qos为0")
-    public String mqttPublish(@RequestParam(value = "messange", defaultValue = "hello mqtt server")  String messange){
+    public String mqttPublish(@RequestParam(value = "messange", defaultValue = "hello mqtt server")  String messange) throws Exception{
         mqttPushClient.publish("/World",messange);
         return JsonResponseUtil.ok("mqtt发送:" + messange);
     }
 
-    private String getFallback(Throwable e){
+    /**
+     * 测试hystrix
+     * @param var
+     * @return
+     * @throws Exception
+     */
+    @HystrixCommand(fallbackMethod="hystrixTestGetFallback",commandKey="hystrixTest",groupKey="TestGroup",
+            threadPoolKey="hystrixTestThread")
+    @RequestMapping(value = "/hystrixTest",method = RequestMethod.GET)
+    @ApiOperation(value="hystrixTest", notes="测试hystrix")
+    public String hystrixTest(@RequestParam(value = "var", defaultValue = "true")  boolean var) throws Exception{
+        if (!var){
+            TimeUnit.SECONDS.sleep(2);
+        }
+        return JsonResponseUtil.ok("ok");
+    }
+
+    private String hystrixTestGetFallback(boolean var, Throwable e){
         e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "开启熔断器";
+    }
+
+
+    private String mainUrlGetFallback(Throwable e){
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";
@@ -69,17 +104,16 @@ public class TestController {
         log.error("Throwable info {}",e.getMessage());
         return "fail";
     }
-//    @RequestMapping(value = "/getJob",method = RequestMethod.GET)
-//    public String getJob(){
-//        return ruleSchedule.printJob();
-//    }
-//
-//    @RequestMapping(value = "/date",method = RequestMethod.GET)
-//    public String date(){
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//
-//        return JsonResponseUtil.ok(sdf.format(DateBuilder.dateOf(17,12,3)));
-//    }
+
+    private String getFallback(Throwable e){
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
 
 
 }

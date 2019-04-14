@@ -52,7 +52,7 @@ public class AdminController {
      * @return
      */
 //    @Token("admin")
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="findAll",groupKey="adminGroup",
+    @HystrixCommand(fallbackMethod="findAllGetFallback",commandKey="findAll",groupKey="adminGroup",
             threadPoolKey="findAllThread")
     @RequestMapping(value = "/findAll", method = RequestMethod.GET)
     @ApiOperation(value="findAll", notes="查询所有device")
@@ -65,7 +65,7 @@ public class AdminController {
      * @param openId
      * @return
      */
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="findByOpenId",groupKey="adminGroup",
+    @HystrixCommand(fallbackMethod="findByOpenIdGetFallback",commandKey="findByOpenId",groupKey="adminGroup",
             threadPoolKey="findByOpenIdThread")
     @RequestMapping(value = "/findByOpenId", method = RequestMethod.GET)
     @ApiOperation(value="findByOpenId", notes="通过openId查询所有device")
@@ -82,7 +82,7 @@ public class AdminController {
      * @return
      */
 //    @Token("admin")
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="insert",groupKey="adminGroup",
+    @HystrixCommand(fallbackMethod="insertGetFallback",commandKey="insert",groupKey="adminGroup",
             threadPoolKey="insertThread")
     @RequestMapping(value = "/insert", method = RequestMethod.GET)
     @ApiOperation(value="insert", notes="新建设备")
@@ -117,7 +117,7 @@ public class AdminController {
      * @return
      */
 //    @Token("admin")
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="updateById",groupKey="adminGroup",
+    @HystrixCommand(fallbackMethod="updateByIdGetFallback",commandKey="updateById",groupKey="adminGroup",
             threadPoolKey="updateByIdThread")
     @RequestMapping(value = "/updateById", method = RequestMethod.GET)
     @ApiOperation(value="updateById", notes="按条件跟新设备，除了id，其他选填")
@@ -154,7 +154,7 @@ public class AdminController {
      * @return
      */
 //    @Token("admin")
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="deleteById",groupKey="adminGroup",
+    @HystrixCommand(fallbackMethod="deleteByIdGetFallback",commandKey="deleteById",groupKey="adminGroup",
             threadPoolKey="deleteByIdThread")
     @RequestMapping(value = "/deleteById", method = RequestMethod.GET)
     @ApiOperation(value="deleteById", notes="通过id删除设备")
@@ -172,7 +172,7 @@ public class AdminController {
      * 一键删除所有设备
      * @return
      */
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="deleteAll",groupKey="adminGroup",
+    @HystrixCommand(fallbackMethod="deleteAllGetFallback",commandKey="deleteAll",groupKey="adminGroup",
             threadPoolKey="deleteAllThread")
     @RequestMapping(value = "/deleteAll", method = RequestMethod.GET)
     @ApiOperation(value="deleteAll", notes="删除所有设备")
@@ -186,7 +186,7 @@ public class AdminController {
      * 获取所有定时任务
      * @return
      */
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="getAllJob",groupKey="adminGroup",
+    @HystrixCommand(fallbackMethod="getAllJobGetFallback",commandKey="getAllJob",groupKey="adminGroup",
             threadPoolKey="getAllJobThread")
     @RequestMapping(value = "/getAllJob", method = RequestMethod.GET)
     @ApiOperation(value="getAllJob", notes="获取所有定时任务")
@@ -198,7 +198,7 @@ public class AdminController {
      * 删除所有定时任务
      * @return
      */
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="removeAllJob",groupKey="adminGroup",
+    @HystrixCommand(fallbackMethod="removeAllJobGetFallback",commandKey="removeAllJob",groupKey="adminGroup",
             threadPoolKey="removeAllJobThread")
     @RequestMapping(value = "/removeAllJob", method = RequestMethod.GET)
     @ApiOperation(value="removeAllJob", notes="删除所有定时任务")
@@ -210,7 +210,7 @@ public class AdminController {
      * 删除对应用户所有定时任务
      * @return
      */
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="removeJobByOpenId",groupKey="adminGroup",
+    @HystrixCommand(fallbackMethod="removeJobByOpenIdGetFallback",commandKey="removeJobByOpenId",groupKey="adminGroup",
             threadPoolKey="removeJobByOpenIdThread")
     @RequestMapping(value = "/removeJobByOpenId", method = RequestMethod.GET)
     @ApiOperation(value="removeJobByOpenId", notes="删除对应用户所有定时任务")
@@ -222,7 +222,7 @@ public class AdminController {
      * 删除单个定时任务
      * @return
      */
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="removeJob",groupKey="adminGroup",
+    @HystrixCommand(fallbackMethod="removeJobGetFallback",commandKey="removeJob",groupKey="adminGroup",
             threadPoolKey="removeJobThread")
     @RequestMapping(value = "/removeJob", method = RequestMethod.GET)
     @ApiOperation(value="removeJob", notes="删除单个定时任务")
@@ -240,7 +240,7 @@ public class AdminController {
         return ruleSchedule.removeJob(id , op, date, openId);
     }
 
-    private String getFallback(Throwable e){
+    private String findAllGetFallback(Throwable e){
         e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
@@ -250,13 +250,104 @@ public class AdminController {
         return "fail";
     }
 
-    private String getFallback(String name,
-                               String model,
-                               String nickname,
-                               String groupId,
-                               String status,
-                               Integer num,
-                               Throwable e){
+    private String findByOpenIdGetFallback(String openId, Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String insertGetFallback(String name,
+                                     String model,
+                                     String nickname,
+                                     String groupId,
+                                     String status,
+                                     Integer num,
+                                     Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String updateByIdGetFallback(String id,
+                                         String name,
+                                         String model,
+                                         String nickname,
+                                         String groupId,
+                                         String status,
+                                         Integer num,
+                                         Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String deleteByIdGetFallback(String id, Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String deleteAllGetFallback(Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String getAllJobGetFallback(Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String removeAllJobGetFallback(Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String removeJobByOpenIdGetFallback(String openId, Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String removeJobGetFallback(String id,
+                                        String op,
+                                        String dateStr,
+                                        String openId,
+                                        Throwable e){
         e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
