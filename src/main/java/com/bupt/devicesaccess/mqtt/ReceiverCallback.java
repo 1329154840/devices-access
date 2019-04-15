@@ -3,12 +3,22 @@ package com.bupt.devicesaccess.mqtt;
 
 import com.bupt.devicesaccess.dao.DeviceRepository;
 import com.bupt.devicesaccess.utils.BeanUtil;
-import jnr.ffi.annotations.In;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+import com.netflix.hystrix.exception.HystrixTimeoutException;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -24,12 +34,20 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class ReceiverCallback implements MqttCallback {
-    private DeviceRepository deviceRepository;
+public class ReceiverCallback implements MqttCallbackExtended {
 
     public final static String HEARTTOPIC = "/device/status";
 
-    public final static int BUFFERLENGHT= 2;
+    private ThreadPoolExecutor threadPool = new ThreadPoolExecutor(5, 10, 3,
+            TimeUnit. SECONDS, new ArrayBlockingQueue<Runnable>(3),
+            new ThreadPoolExecutor.DiscardOldestPolicy());
+
+    private String url;
+
+    @Override
+    public void connectComplete(boolean reconnect, String serverURI) {
+        log.info("MQTTReconnect {} serverURI {}", reconnect, serverURI);
+    }
 
     /**
      * 断线回调
@@ -37,7 +55,8 @@ public class ReceiverCallback implements MqttCallback {
      */
     @Override
     public void connectionLost(Throwable throwable) {
-        log.info("mqtt连接断开，可以做重连");
+        log.info("MQTTConnectionLost");
+
     }
 
     /**
@@ -51,7 +70,8 @@ public class ReceiverCallback implements MqttCallback {
         String mes = new String(message.getPayload());
         if (HEARTTOPIC.equals(topic)){
             log.info("hotUpdate {}" , mes);
-            hotUpdate(mes);
+            threadPool.execute(getThread(mes));
+
         }
     }
 
@@ -65,34 +85,19 @@ public class ReceiverCallback implements MqttCallback {
     }
 
     /**
-     * 实时更新状态
-     * @param message
+     * restful线程任务，来热更新
+     * @return
      */
-    private void hotUpdate(String message){
-        String[] buffer = message.split("/");
-        if (buffer.length == BUFFERLENGHT){
-            try{
-                getRepositoryBean();
-                if (deviceRepository.existsById(buffer[0])){
-                    deviceRepository.updateById(buffer[0] , buffer[1]);
-                }
-            } catch (Exception e){
-                e.printStackTrace();
+    private static Runnable getThread(String mes){
+        return new Runnable() {
+            @Override
+            public void run() {
+                RestTemplate restTemplate = BeanUtil.getBean(RestTemplate.class);
+                String url = "http://devices-access/device/hotUpdate?message={message}";
+                Map<String,String> var= new HashMap<>(1);
+                var.put("message",mes);
+                restTemplate.getForObject( url, String.class, var);
             }
-        }
+        };
     }
-
-    /**
-     * Autowired自动注入失效，采用手动注入 deviceRepository
-     * @throws Exception
-     */
-    private void getRepositoryBean() throws Exception{
-        if (deviceRepository == null){
-            deviceRepository = BeanUtil.getBean(DeviceRepository.class);
-            if (deviceRepository == null){
-                throw new Exception("deviceRepository 获取bean为空");
-            }
-        }
-    }
-
 }

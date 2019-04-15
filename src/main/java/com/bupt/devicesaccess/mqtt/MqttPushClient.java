@@ -39,6 +39,7 @@ public class MqttPushClient {
             options.setPassword(password.toCharArray());
             options.setConnectionTimeout(timeout);
             options.setKeepAliveInterval(keepalive);
+            options.setAutomaticReconnect(true);
             MqttPushClient.setClient(client);
             try {
                 client.setCallback(new ReceiverCallback());

@@ -55,7 +55,7 @@ public class UserController {
      * @return
      */
 //    @Token
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="findFreeAll",groupKey="UserGroup",
+    @HystrixCommand(fallbackMethod="findFreeAllGetFallback",commandKey="findFreeAll",groupKey="UserGroup",
             threadPoolKey="findFreeAllThread")
     @RequestMapping(value = "/findFreeAll", method = RequestMethod.GET)
     @ApiOperation(value="findFreeAll", notes="查询自己拥有的所有device")
@@ -67,7 +67,7 @@ public class UserController {
      * @return
      */
 //    @Token
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="findAll",groupKey="UserGroup",
+    @HystrixCommand(fallbackMethod="findAllGetFallback",commandKey="findAll",groupKey="UserGroup",
             threadPoolKey="findAllThread")
     @RequestMapping(value = "/findAll", method = RequestMethod.GET)
     @ApiOperation(value="findAll", notes="查询自己拥有的所有device")
@@ -79,7 +79,7 @@ public class UserController {
      * @return
      */
 //    @Token
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="findGroupId",groupKey="UserGroup",
+    @HystrixCommand(fallbackMethod="findGroupIdGetFallback",commandKey="findGroupId",groupKey="UserGroup",
             threadPoolKey="findGroupIdThread")
     @RequestMapping(value = "/findGroupId", method = RequestMethod.GET)
     @ApiOperation(value="findGroupId", notes="查询自己拥有的组号")
@@ -91,7 +91,7 @@ public class UserController {
      * @return
      */
 //    @Token
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="findByGroupId",groupKey="UserGroup",
+    @HystrixCommand(fallbackMethod="findByGroupIdGetFallback",commandKey="findByGroupId",groupKey="UserGroup",
             threadPoolKey="findByGroupIdThread")
     @RequestMapping(value = "/findByGroupId", method = RequestMethod.GET)
     @ApiOperation(value="findByGroupId", notes="查询自己拥有对应组的device")
@@ -102,7 +102,7 @@ public class UserController {
      * 查询单个device
      */
 //    @Token
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="findById",groupKey="UserGroup",
+    @HystrixCommand(fallbackMethod="findByIdGetFallback",commandKey="findById",groupKey="UserGroup",
             threadPoolKey="findByIdThread")
     @RequestMapping(value = "/findById", method = RequestMethod.GET)
     @ApiOperation(value="findById", notes="查询单个device")
@@ -114,7 +114,7 @@ public class UserController {
      * @return 返回device
      */
 //    @Token
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="insert",groupKey="UserGroup",
+    @HystrixCommand(fallbackMethod="insertGetFallback",commandKey="insert",groupKey="UserGroup",
             threadPoolKey="insertThread")
     @RequestMapping(value = "/insert", method = {RequestMethod.GET,RequestMethod.POST})
     @ApiOperation(value="insert", notes="将新建空设备，拉入自己组下")
@@ -142,7 +142,7 @@ public class UserController {
      * @return 返回更新完 device
      */
 //    @Token
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="update",groupKey="UserGroup",
+    @HystrixCommand(fallbackMethod="updateGetFallback",commandKey="update",groupKey="UserGroup",
             threadPoolKey="updateThread")
     @RequestMapping(value = "/update", method = {RequestMethod.GET,RequestMethod.POST})
     @ApiOperation(value="update", notes="按条件更新单个device，传只需要更新的字段，其他字段为null不传")
@@ -172,7 +172,7 @@ public class UserController {
      * @return
      */
 //    @Token
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="deleteById",groupKey="UserGroup",
+    @HystrixCommand(fallbackMethod="deleteByIdGetFallback",commandKey="deleteById",groupKey="UserGroup",
             threadPoolKey="deleteByIdThread")
     @RequestMapping(value = "/deleteById", method = {RequestMethod.GET,RequestMethod.POST})
     @ApiOperation(value="deleteById", notes="解绑该设备")
@@ -197,7 +197,7 @@ public class UserController {
      * @param rule
      * @return
      */
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="upload",groupKey="UserGroup",
+    @HystrixCommand(fallbackMethod="uploadGetFallback",commandKey="upload",groupKey="UserGroup",
             threadPoolKey="uploadThread")
     @RequestMapping(value = "/upload",method = { RequestMethod.GET, RequestMethod.POST})
     @ApiOperation(value="upload", notes="上传规则")
@@ -217,7 +217,7 @@ public class UserController {
      * 获取个人定时任务
      * @return
      */
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="getJob",groupKey="UserGroup",
+    @HystrixCommand(fallbackMethod="getJobGetFallback",commandKey="getJob",groupKey="UserGroup",
             threadPoolKey="getJobThread")
     @RequestMapping(value = "/getJob", method = RequestMethod.GET)
     @ApiOperation(value="getJob", notes="获取个人定时任务")
@@ -229,7 +229,7 @@ public class UserController {
      * 删除该用户所有定时任务
      * @return
      */
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="removeJobByOpenId",groupKey="UserGroup",
+    @HystrixCommand(fallbackMethod="removeJobByOpenIdGetFallback",commandKey="removeJobByOpenId",groupKey="UserGroup",
             threadPoolKey="removeJobByOpenIdThread")
     @RequestMapping(value = "/removeJobByOpenId", method = RequestMethod.GET)
     @ApiOperation(value="removeJobByOpenId", notes="删除该用户所有定时任务")
@@ -241,7 +241,7 @@ public class UserController {
      * 删除单个定时任务
      * @return
      */
-    @HystrixCommand(fallbackMethod="getFallback",commandKey="removeJob",groupKey="UserGroup",
+    @HystrixCommand(fallbackMethod="removeJobGetFallback",commandKey="removeJob",groupKey="UserGroup",
             threadPoolKey="removeJobThread")
     @RequestMapping(value = "/removeJob", method = RequestMethod.GET)
     @ApiOperation(value="removeJob", notes="删除单个定时任务")
@@ -260,7 +260,126 @@ public class UserController {
     }
 
 
-    private String getFallback(Throwable e){
+    private String findFreeAllGetFallback(Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String findAllGetFallback(Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String findGroupIdGetFallback(Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String findByGroupIdGetFallback(String groupId, Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String findByIdGetFallback(String id, Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String insertGetFallback(String id,
+                                     String groupId,
+                                     Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String updateGetFallback(String id,
+                                     String groupId,
+                                     String nickname,
+                                     String status,
+                                     Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String deleteByIdGetFallback(String id, Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String uploadGetFallback(String rule, Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String getJobGetFallback(Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String removeJobByOpenIdGetFallback(Throwable e){
+        e.printStackTrace();
+        if ( e instanceof HystrixTimeoutException){
+            log.error("Timeout");
+            return "系统繁忙，请稍后";
+        }
+        log.error("Throwable info {}",e.getMessage());
+        return "fail";
+    }
+
+    private String removeJobGetFallback(String id,
+                                        String op,
+                                        String dateStr,
+                                        Throwable e){
         e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
