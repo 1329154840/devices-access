@@ -14,12 +14,11 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -201,10 +200,42 @@ public class UserController {
             threadPoolKey="uploadThread")
     @RequestMapping(value = "/upload",method = { RequestMethod.GET, RequestMethod.POST})
     @ApiOperation(value="upload", notes="上传规则")
-    public String upload(@RequestParam String rule){
+    public String upload(@RequestParam(value = "rule",required = false) String rule,HttpServletRequest request){
+        BufferedReader br = null;
+        StringBuilder sb = new StringBuilder("");
+        try
+        {
+            br = request.getReader();
+            String str;
+            while ((str = br.readLine()) != null)
+            {
+                sb.append(str);
+            }
+            br.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            if (null != br)
+            {
+                try
+                {
+                    br.close();
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        log.info("rule={}",sb);
         String result;
         try {
-            JSONObject jsonRule =JSONObject.parseObject(rule);
+            JSONObject jsonRule =JSONObject.parseObject(sb.toString());
+            log.info("",jsonRule);
             result =ruleSchedule.adapter(jsonRule);
         } catch (JSONException e){
             log.error("json 解析有误");

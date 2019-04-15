@@ -91,7 +91,8 @@ public class AdminController {
                          @RequestParam(value = "nickname", required = false) String nickname,
                          @RequestParam(value = "groupId", required = false) String groupId,
                          @RequestParam(value = "status", required = false) String status,
-                         @RequestParam(value = "num", defaultValue = "1") Integer num){
+                         @RequestParam(value = "num", defaultValue = "1") Integer num,
+                         @RequestParam(value = "openId", required = false,defaultValue = "-1") String openId){
         Device device =new Device();
         for (int i=0;i<num;i++){
             device =new Device(model, name);
@@ -102,6 +103,8 @@ public class AdminController {
             }if (status != null){
                 device.setStatus(status);
             }
+            device.setOpenId(openId);
+
             deviceRepository.save(device);
         }
         return JsonResponseUtil.ok(device);
@@ -126,7 +129,8 @@ public class AdminController {
                              @RequestParam(value = "model", required = false) String model,
                              @RequestParam(value = "nickname", required = false) String nickname,
                              @RequestParam(value = "groupId", required = false) String groupId,
-                             @RequestParam(value = "status", required = false) String status){
+                             @RequestParam(value = "status", required = false) String status,
+                             @RequestParam(value = "openId", required = false) String openId){
         Optional<Device> optionalDevice =deviceRepository.findById(id);
         if(!optionalDevice.isPresent()){
             return JsonResponseUtil.badResult(BadResultCode.Device_Is_Null.getCode(),BadResultCode.Device_Is_Null.getRemark());
@@ -142,6 +146,8 @@ public class AdminController {
             device.setGroupId(groupId);
         }if (status != null){
             device.setStatus(status);
+        }if (openId != null){
+            device.setOpenId(openId);
         }
         Device newDevice = deviceRepository.save(device);
         log.info("updateDevice {}",newDevice);
