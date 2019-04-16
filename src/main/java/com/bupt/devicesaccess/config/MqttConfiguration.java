@@ -109,7 +109,7 @@ public class MqttConfiguration {
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     @Bean
     public MqttPushClient getMqttPushClient(){
-        String newClientId = String.format(clientId + "-%s",sdf.format(new Date()));
+        String newClientId = String.format(clientId + " %s",sdf.format(new Date()));
         MqttPushClient mqttPushClient = new MqttPushClient();
         mqttPushClient.connect(host, newClientId, userName, password, topic, timeout,keepalive);
         log.info("mqttPushClient connect,clientId {}",newClientId);
