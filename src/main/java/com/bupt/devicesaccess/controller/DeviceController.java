@@ -47,6 +47,7 @@ public class DeviceController {
             threadPoolKey="hotUpdateThread")
     public String hotUpdate(@RequestParam String message) throws Exception{
 //        TimeUnit.SECONDS.sleep(5);
+        log.info("hotUpdate");
         String[] buffer = message.split("/");
         if (buffer.length == BUFFERLENGHT){
             if (deviceRepository.existsById(buffer[0])){

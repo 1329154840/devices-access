@@ -377,7 +377,7 @@ public class UserController {
         return "fail";
     }
 
-    private String uploadGetFallback(String rule, Throwable e){
+    private String uploadGetFallback(String rule, HttpServletRequest request, Throwable e){
         e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");

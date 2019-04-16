@@ -86,7 +86,7 @@ public class TestController {
     }
 
     private String hystrixTestGetFallback(boolean var, Throwable e){
-        e.printStackTrace();
+//        e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";

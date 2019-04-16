@@ -33,7 +33,6 @@ import java.util.*;
 @Slf4j
 @Component
 public class RuleSchedule{
-    @Qualifier("mySchedule")
     @Autowired
     Scheduler scheduler;
     /**

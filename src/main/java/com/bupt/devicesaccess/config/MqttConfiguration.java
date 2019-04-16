@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
+import java.util.Random;
+
 /**
  * Created by IntelliJ IDEA.
  * Description:  ---——require需求|ask问题|jira
@@ -101,8 +103,9 @@ public class MqttConfiguration {
     }
     @Bean
     public MqttPushClient getMqttPushClient(){
+        String newClientId = String.format(clientId + "-%d",new Random(System.currentTimeMillis()).nextInt());
         MqttPushClient mqttPushClient = new MqttPushClient();
-        mqttPushClient.connect(host, clientId, userName, password, topic, timeout,keepalive);
+        mqttPushClient.connect(host, newClientId, userName, password, topic, timeout,keepalive);
         return mqttPushClient;
     }
 
