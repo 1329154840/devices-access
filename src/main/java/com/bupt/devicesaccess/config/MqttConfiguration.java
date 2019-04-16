@@ -1,6 +1,7 @@
 package com.bupt.devicesaccess.config;
 
 import com.bupt.devicesaccess.mqtt.MqttPushClient;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -8,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
 /**
@@ -24,6 +27,7 @@ import java.util.Random;
  */
 @Component
 @Configuration
+@Slf4j
 public class MqttConfiguration {
     @Value("${mqtt.host}")
     private String host;
@@ -101,11 +105,14 @@ public class MqttConfiguration {
     public void setHost(String host) {
         this.host = host;
     }
+
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     @Bean
     public MqttPushClient getMqttPushClient(){
-        String newClientId = String.format(clientId + "-%d",new Random(System.currentTimeMillis()).nextInt());
+        String newClientId = String.format(clientId + "-%s",sdf.format(new Date()));
         MqttPushClient mqttPushClient = new MqttPushClient();
         mqttPushClient.connect(host, newClientId, userName, password, topic, timeout,keepalive);
+        log.info("mqttPushClient connect,clientId {}",newClientId);
         return mqttPushClient;
     }
 
