@@ -257,7 +257,6 @@ public class AdminController {
     }
 
     private String findByOpenIdGetFallback(String openId, Throwable e){
-        e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";
@@ -272,8 +271,8 @@ public class AdminController {
                                      String groupId,
                                      String status,
                                      Integer num,
+                                     String openId,
                                      Throwable e){
-        e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";
@@ -288,9 +287,8 @@ public class AdminController {
                                          String nickname,
                                          String groupId,
                                          String status,
-                                         Integer num,
+                                         String openId,
                                          Throwable e){
-        e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";
@@ -300,7 +298,6 @@ public class AdminController {
     }
 
     private String deleteByIdGetFallback(String id, Throwable e){
-        e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";

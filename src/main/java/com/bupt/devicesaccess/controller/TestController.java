@@ -13,10 +13,13 @@ import com.netflix.hystrix.exception.HystrixTimeoutException;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.concurrent.TimeUnit;
 
 
@@ -51,9 +54,11 @@ public class TestController {
             threadPoolKey="mainUrlThread")
     public String mainUrl() throws Exception{
 //        int i= 1/0;
-        TimeUnit.SECONDS.sleep(5);
+//        TimeUnit.SECONDS.sleep(5);
         return JsonResponseUtil.ok("欢迎使用 devices-access，请访问swagger-ui.html获取接口信息");
+
     }
+
 
     /**
      * 测试mqtt发送

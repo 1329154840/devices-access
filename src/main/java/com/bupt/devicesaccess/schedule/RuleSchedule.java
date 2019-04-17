@@ -43,30 +43,15 @@ public class RuleSchedule{
     public String adapter(JSONObject rule){
         JSONArray ruleArray = rule.getJSONArray("rule");
         for(int i = 0;i < ruleArray.size();i++){
-            JSONObject data = JSONObject.parseObject(ruleArray.get(0).toString());
-            String time = data.getString("date");
-
+            JSONObject singleRule = ruleArray.getJSONObject(i);
+            String time = singleRule.getString("date");
             Date date = new Date(Long.valueOf(time));
-
-            log.info("date={}",date);
-            //SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
-//        try {
-//            java.util.Date d = format.parse(time);
-//            java.sql.Time time1 = new java.sql.Time(d.getTime());
-//            date =time1;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
-            String type = rule.getString("type");
-            //for(int i=0; i<data.size(); i++){
-            //JSONObject singleRule = data.getJSONObject(i);
-            String id = data.getString("id");
-            String op = data.getString("op");
+            String type = singleRule.getString("type");
+            String id = singleRule.getString("id");
+            String op = singleRule.getString("op");
             if ( !addJob( id, op, date )){
                 return JsonResponseUtil.badResult( BadResultCode.Rule_Upload_Error.getCode(), BadResultCode.Rule_Upload_Error.getRemark() + String.format(",第%d可能重复", i+1));
             }
-            //}
         }
         return JsonResponseUtil.ok("规则上传成功");
     }

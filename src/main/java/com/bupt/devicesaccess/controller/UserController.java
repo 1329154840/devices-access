@@ -21,9 +21,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 
 /**
@@ -59,7 +62,7 @@ public class UserController {
     @RequestMapping(value = "/findFreeAll", method = RequestMethod.GET)
     @ApiOperation(value="findFreeAll", notes="查询自己拥有的所有device")
     public String findFreeAll() throws Exception{
-        return JsonResponseUtil.ok(deviceRepository.findFreeAll( RequestUtils.getOpenId()));
+        return JsonResponseUtil.ok(deviceRepository.findFreeAll());
     }
     /**
      * 查询自己拥有的所有设备
@@ -83,7 +86,13 @@ public class UserController {
     @RequestMapping(value = "/findGroupId", method = RequestMethod.GET)
     @ApiOperation(value="findGroupId", notes="查询自己拥有的组号")
     public String findGroupId(){
-        return JsonResponseUtil.ok(deviceRepository.findGroupId( RequestUtils.getOpenId()));
+        List<Device> deviceList = deviceRepository.findByOpenId( RequestUtils.getOpenId());
+        List<String> groupList = new ArrayList<>(deviceList.size());
+        for(Device device:deviceList){
+            groupList.add(device.getGroupId());
+        }
+        List distinctList = groupList.stream().distinct().collect(Collectors.toList());
+        return JsonResponseUtil.ok(distinctList);
     }
     /**
      * 查询自己拥有对应组的device
@@ -106,7 +115,11 @@ public class UserController {
     @RequestMapping(value = "/findById", method = RequestMethod.GET)
     @ApiOperation(value="findById", notes="查询单个device")
     public String findById(@RequestParam(value = "id") String id){
-        return JsonResponseUtil.ok(deviceRepository.findById(id));
+        Optional<Device>  deviceList =deviceRepository.findById(id);
+        if (!deviceList.isPresent() && deviceList.get().getOpenId().equals(RequestUtils.getOpenId())){
+            return JsonResponseUtil.ok(deviceList);
+        }
+        return JsonResponseUtil.ok();
     }
     /**
      * 将新建空设备，拉入自己组下
@@ -182,7 +195,7 @@ public class UserController {
             return JsonResponseUtil.badResult(BadResultCode.Device_Is_Null.getCode(),BadResultCode.Device_Is_Null.getRemark());
         }
         Device device = optionalDevice.get();
-        device.setStatus("关机");
+        device.setStatus("OFF");
         device.setOpenId("-1");
         device.setGroupId("-1");
         device.setNickname("");
@@ -201,41 +214,41 @@ public class UserController {
     @RequestMapping(value = "/upload",method = { RequestMethod.GET, RequestMethod.POST})
     @ApiOperation(value="upload", notes="上传规则")
     public String upload(@RequestParam(value = "rule",required = false) String rule,HttpServletRequest request){
-        BufferedReader br = null;
-        StringBuilder sb = new StringBuilder("");
-        try
-        {
-            br = request.getReader();
-            String str;
-            while ((str = br.readLine()) != null)
-            {
-                sb.append(str);
-            }
-            br.close();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        finally
-        {
-            if (null != br)
-            {
-                try
-                {
-                    br.close();
-                }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }
-        log.info("rule={}",sb);
+//        BufferedReader br = null;
+//        StringBuilder sb = new StringBuilder("");
+//        try
+//        {
+//            br = request.getReader();
+//            String str;
+//            while ((str = br.readLine()) != null)
+//            {
+//                sb.append(str);
+//            }
+//            br.close();
+//        }
+//        catch (IOException e)
+//        {
+//            e.printStackTrace();
+//        }
+//        finally
+//        {
+//            if (null != br)
+//            {
+//                try
+//                {
+//                    br.close();
+//                }
+//                catch (IOException e)
+//                {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//        log.info("rule={}",sb);
         String result;
         try {
-            JSONObject jsonRule =JSONObject.parseObject(sb.toString());
-            log.info("",jsonRule);
+            JSONObject jsonRule =JSONObject.parseObject(rule);
+            log.info("{}",jsonRule);
             result =ruleSchedule.adapter(jsonRule);
         } catch (JSONException e){
             log.error("json 解析有误");
@@ -292,7 +305,6 @@ public class UserController {
 
 
     private String findFreeAllGetFallback(Throwable e){
-        e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";
@@ -302,7 +314,6 @@ public class UserController {
     }
 
     private String findAllGetFallback(Throwable e){
-        e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";
@@ -312,7 +323,6 @@ public class UserController {
     }
 
     private String findGroupIdGetFallback(Throwable e){
-        e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";
@@ -322,7 +332,6 @@ public class UserController {
     }
 
     private String findByGroupIdGetFallback(String groupId, Throwable e){
-        e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";
@@ -332,7 +341,6 @@ public class UserController {
     }
 
     private String findByIdGetFallback(String id, Throwable e){
-        e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";
@@ -344,7 +352,6 @@ public class UserController {
     private String insertGetFallback(String id,
                                      String groupId,
                                      Throwable e){
-        e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";
@@ -358,7 +365,6 @@ public class UserController {
                                      String nickname,
                                      String status,
                                      Throwable e){
-        e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";
@@ -368,7 +374,6 @@ public class UserController {
     }
 
     private String deleteByIdGetFallback(String id, Throwable e){
-        e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";
@@ -378,7 +383,6 @@ public class UserController {
     }
 
     private String uploadGetFallback(String rule, HttpServletRequest request, Throwable e){
-        e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";
@@ -388,7 +392,6 @@ public class UserController {
     }
 
     private String getJobGetFallback(Throwable e){
-        e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";
@@ -398,7 +401,6 @@ public class UserController {
     }
 
     private String removeJobByOpenIdGetFallback(Throwable e){
-        e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";
@@ -411,7 +413,6 @@ public class UserController {
                                         String op,
                                         String dateStr,
                                         Throwable e){
-        e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";

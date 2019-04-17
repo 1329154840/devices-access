@@ -22,8 +22,8 @@ import java.util.List;
 public interface DeviceRepository extends CrudRepository<Device,String> {
     String SELECT = "SELECT id,open_id,group_id,model,name,nickname,status FROM device ";
 
-    @Query(SELECT + "WHERE open_id = :open_id ALLOW FILTERING")
-    List<Device> findFreeAll(@Param("open_id") String openId);
+    @Query(SELECT + "WHERE open_id = '-1' ALLOW FILTERING")
+    List<Device> findFreeAll();
 
     @Query(SELECT + "WHERE open_id = :open_id ALLOW FILTERING")
     List<Device> findByOpenId(@Param("open_id") String openId);
@@ -31,8 +31,6 @@ public interface DeviceRepository extends CrudRepository<Device,String> {
     @Query(SELECT + "WHERE open_id = :open_id And group_id = :group_id ALLOW FILTERING")
     List<Device> findByOpenIdAndGroupId(@Param("open_id") String openId, @Param("group_id") String groupId);
 
-    @Query("SELECT DISTINCT group_id FROM device WHERE open_id = :open_id ALLOW FILTERING")
-    List<String> findGroupId(@Param("open_id") String openId);
 
     @Query("UPDATE device SET status = :status WHERE id = :id ")
     void updateById(@Param("id") String id, @Param("status") String status);
