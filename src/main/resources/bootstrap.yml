@@ -16,3 +16,8 @@ eureka:
   instance:
     prefer-ip-address: true
     instance-id: 114.115.130.42:${server.port}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream

@@ -287,20 +287,14 @@ public class UserController {
      */
     @HystrixCommand(fallbackMethod="removeJobGetFallback",commandKey="removeJob",groupKey="UserGroup",
             threadPoolKey="removeJobThread")
-    @RequestMapping(value = "/removeJob", method = RequestMethod.GET)
+    @RequestMapping(value = "/removeJob", method = {RequestMethod.GET,RequestMethod.POST})
     @ApiOperation(value="removeJob", notes="删除单个定时任务")
     public String removeJob(@RequestParam String id,
                                     @RequestParam String op,
-                                    @RequestParam String dateStr){
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                    @RequestParam long date){
         String openId = RequestUtils.getOpenId();
-        Date date = null;
-        try {
-            date = sdf.parse(dateStr);
-        } catch (ParseException e) {
-            return JsonResponseUtil.badResult( BadResultCode.Date_Error.getCode(), BadResultCode.Date_Error.getRemark());
-        }
-        return ruleSchedule.removeJob(id , op, date, openId);
+        Date dated = new Date(date);
+        return ruleSchedule.removeJob(id , op, dated, openId);
     }
 
 
