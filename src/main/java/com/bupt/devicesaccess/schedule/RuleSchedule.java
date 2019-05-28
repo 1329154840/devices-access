@@ -40,7 +40,7 @@ public class RuleSchedule{
      * @param rule
      * @return
      */
-    public String adapter(JSONObject rule){
+    public String adapter(JSONObject rule, String openId){
         JSONArray ruleArray = rule.getJSONArray("rule");
         for(int i = 0;i < ruleArray.size();i++){
             JSONObject singleRule = ruleArray.getJSONObject(i);
@@ -49,7 +49,7 @@ public class RuleSchedule{
             String type = singleRule.getString("type");
             String id = singleRule.getString("id");
             String op = singleRule.getString("op");
-            if ( !addJob( id, op, date )){
+            if ( !addJob( id, op, date , openId)){
                 return JsonResponseUtil.badResult( BadResultCode.Rule_Upload_Error.getCode(), BadResultCode.Rule_Upload_Error.getRemark() + String.format(",第%d可能重复", i+1));
             }
         }
@@ -63,9 +63,8 @@ public class RuleSchedule{
      * @param date
      * @Return boolean
      */
-    private boolean addJob(String id,String operate, Date date ){
+    private boolean addJob(String id,String operate, Date date ,String openId){
         String jobName = id + "/" + operate + "/" + date.toString();
-        String openId = RequestUtils.getOpenId();
         log.info("{}", openId);
         JobDetail jobDetail = JobBuilder.newJob(RuleJob.class)
                 .withIdentity(jobName , openId).build();

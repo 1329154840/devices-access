@@ -213,7 +213,7 @@ public class UserController {
             threadPoolKey="uploadThread")
     @RequestMapping(value = "/upload",method = { RequestMethod.GET, RequestMethod.POST})
     @ApiOperation(value="upload", notes="上传规则")
-    public String upload(@RequestParam(value = "rule",required = false) String rule,HttpServletRequest request){
+    public String upload(@RequestParam(value = "rule",required = false) String rule){
 //        BufferedReader br = null;
 //        StringBuilder sb = new StringBuilder("");
 //        try
@@ -247,9 +247,10 @@ public class UserController {
 //        log.info("rule={}",sb);
         String result;
         try {
+            String openId = RequestUtils.getOpenId();
             JSONObject jsonRule =JSONObject.parseObject(rule);
             log.info("{}",jsonRule);
-            result =ruleSchedule.adapter(jsonRule);
+            result =ruleSchedule.adapter(jsonRule,openId);
         } catch (JSONException e){
             log.error("json 解析有误");
             return JsonResponseUtil.badResult( BadResultCode.Rule_Json_Error.getCode(), BadResultCode.Rule_Json_Error.getRemark());
@@ -376,7 +377,7 @@ public class UserController {
         return "fail";
     }
 
-    private String uploadGetFallback(String rule, HttpServletRequest request, Throwable e){
+    private String uploadGetFallback(String rule, Throwable e){
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
             return "系统繁忙，请稍后";

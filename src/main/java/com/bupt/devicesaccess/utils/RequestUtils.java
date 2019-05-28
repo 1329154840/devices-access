@@ -33,7 +33,7 @@ public class RequestUtils {
                 if (cookie.getName().equals("token")) {
                     System.out.println(cookie.getValue());
                     String[] buffer = cookie.getValue().split("-");
-
+                    System.out.println(buffer[0]+" "+buffer[1]+" "+buffer[2]);
                     return buffer[0];
                 }
             }

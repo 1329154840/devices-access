@@ -94,10 +94,10 @@ public class TestController {
 //        e.printStackTrace();
         if ( e instanceof HystrixTimeoutException){
             log.error("Timeout");
-            return "系统繁忙，请稍后";
+            return JsonResponseUtil.badResult(1 , "系统繁忙，请稍后");
         }
         log.error("Throwable info {}",e.getMessage());
-        return "开启熔断器";
+        return JsonResponseUtil.badResult(2,"开启熔断器");
     }
 
 

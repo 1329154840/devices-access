@@ -39,7 +39,7 @@ public class RuleJob implements Job {
         String[] buffer = jobName.split("/");
         String id = buffer[0];
         String op = buffer[1];
-        String printTime = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss").format(new Date());
+        String printTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         log.info("[job start] id: {} op: {} Date: {}", id, op, printTime);
         if(deviceRepository == null){
             deviceRepository = BeanUtil.getBean(DeviceRepository.class);
